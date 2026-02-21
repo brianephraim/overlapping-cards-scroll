@@ -1,5 +1,29 @@
 import { StyleSheet, View } from 'react-native'
-import { OverlappingCardsScroll } from '../lib'
+import {
+  OverlappingCardsScroll,
+  OverlappingCardsScrollFocusTrigger,
+} from '../lib'
+
+export function OverlappingCardsScrollRNFocusTrigger({
+  children = 'Make principal',
+  className = '',
+  onPress,
+  ...buttonProps
+}) {
+  const handleClick = (event) => {
+    onPress?.(event)
+  }
+
+  return (
+    <OverlappingCardsScrollFocusTrigger
+      className={className}
+      onClick={handleClick}
+      {...buttonProps}
+    >
+      {children}
+    </OverlappingCardsScrollFocusTrigger>
+  )
+}
 
 export function OverlappingCardsScrollRN({
   children,

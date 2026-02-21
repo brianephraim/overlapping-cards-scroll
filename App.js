@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { OverlappingCardsScrollRN } from './src/rn/OverlappingCardsScrollRN'
+import {
+  OverlappingCardsScrollRN,
+  OverlappingCardsScrollRNFocusTrigger,
+} from './src/rn/OverlappingCardsScrollRN'
 
 const LONG_SCROLL_LINES = [
   'Line 01: Long-form content inside this card should scroll vertically.',
@@ -119,6 +122,7 @@ function ExpoCard({ tag, title, body, color, scrollLines }) {
       <Pressable style={styles.counter} onPress={() => setClickCount((count) => count + 1)}>
         <Text style={styles.counterText}>Clicks: {clickCount}</Text>
       </Pressable>
+      <OverlappingCardsScrollRNFocusTrigger>Make principal</OverlappingCardsScrollRNFocusTrigger>
       <Text style={styles.cardTitle}>{title}</Text>
       <Text style={styles.cardBody}>{body}</Text>
       {scrollLines ? (

@@ -57,3 +57,31 @@
   width: 100%;
   height: 100%;
 }
+
+.ocs-focus-trigger {
+  appearance: none;
+  align-self: flex-start;
+  margin: 0;
+  border: 1px solid rgba(30, 67, 99, 0.25);
+  border-radius: 999px;
+  background: #f3f8ff;
+  color: #1f4666;
+  font-size: 0.78rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.34rem 0.6rem;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.ocs-focus-trigger:hover {
+  transform: translateY(-1px);
+  background: #e8f2ff;
+  border-color: rgba(20, 72, 118, 0.35);
+}
+
+.ocs-focus-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { OverlappingCardsScroll } from './lib'
+import { OverlappingCardsScroll, OverlappingCardsScrollFocusTrigger } from './lib'
 import { RNWebDemo } from './rn/RNWebDemo'
 import './App.css'
 
@@ -124,6 +124,9 @@ function BasicCard({ tag, title, body, accent }) {
       <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
         Clicks: {clickCount}
       </button>
+      <OverlappingCardsScrollFocusTrigger className="card-counter">
+        Make principal
+      </OverlappingCardsScrollFocusTrigger>
       <h3>{title}</h3>
       <p>{body}</p>
     </article>
@@ -142,6 +145,9 @@ function ContentCard({ label, title, score, bullets, tone }) {
       <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
         Clicks: {clickCount}
       </button>
+      <OverlappingCardsScrollFocusTrigger className="card-counter">
+        Make principal
+      </OverlappingCardsScrollFocusTrigger>
       <h3>{title}</h3>
       <ul>
         {bullets.map((bullet) => (
@@ -164,6 +170,9 @@ function StressCard({ index }) {
       <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
         Clicks: {clickCount}
       </button>
+      <OverlappingCardsScrollFocusTrigger className="card-counter">
+        Make principal
+      </OverlappingCardsScrollFocusTrigger>
       <h3>Deck Position #{index + 1}</h3>
       <p>Edge visibility remains maintained while this card joins the active position.</p>
     </article>

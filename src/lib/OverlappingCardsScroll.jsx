@@ -1,9 +1,71 @@
-import { Children, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Children,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import './OverlappingCardsScroll.css'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 const toCssDimension = (value) => (typeof value === 'number' ? `${value}px` : value)
+
+const OverlappingCardsScrollControllerContext = createContext(null)
+const OverlappingCardsScrollCardIndexContext = createContext(null)
+
+function useOverlappingCardsScrollCardControl() {
+  const controller = useContext(OverlappingCardsScrollControllerContext)
+  const cardIndex = useContext(OverlappingCardsScrollCardIndexContext)
+
+  const canFocus = controller !== null && cardIndex !== null
+  const focusCard = useCallback(
+    (options) => {
+      if (!canFocus) {
+        return
+      }
+      controller.focusCard(cardIndex, options)
+    },
+    [canFocus, cardIndex, controller],
+  )
+
+  return {
+    cardIndex,
+    canFocus,
+    focusCard,
+  }
+}
+
+export function OverlappingCardsScrollFocusTrigger({
+  children = 'Make principal',
+  className = '',
+  behavior = 'smooth',
+  onClick,
+  ...buttonProps
+}) {
+  const { canFocus, focusCard } = useOverlappingCardsScrollCardControl()
+
+  const handleClick = (event) => {
+    onClick?.(event)
+
+    if (!event.defaultPrevented) {
+      focusCard({ behavior })
+    }
+  }
+
+  const buttonClassName = className
+    ? `ocs-focus-trigger ${className}`
+    : 'ocs-focus-trigger'
+
+  return (
+    <button type="button" className={buttonClassName} disabled={!canFocus} onClick={handleClick} {...buttonProps}>
+      {children}
+    </button>
+  )
+}
 
 const resolveCardWidth = (cardWidth, viewportWidth, fallbackRatio) => {
   if (typeof cardWidth === 'number' && Number.isFinite(cardWidth) && cardWidth > 0) {
@@ -128,6 +190,39 @@ export function OverlappingCardsScroll({
   const activeIndex = Math.floor(progress)
   const transitionProgress = progress - activeIndex
 
+  const focusCard = useCallback(
+    (targetIndex, options = {}) => {
+      const scrollElement = scrollRef.current
+      if (!scrollElement || cardCount === 0) {
+        return
+      }
+
+      const safeIndex = clamp(Math.round(targetIndex), 0, cardCount - 1)
+      const nextScrollLeft = clamp(safeIndex * layout.stepDistance, 0, layout.scrollRange)
+
+      if (typeof scrollElement.scrollTo === 'function') {
+        scrollElement.scrollTo({
+          left: nextScrollLeft,
+          behavior: options.behavior ?? 'smooth',
+        })
+      } else {
+        scrollElement.scrollLeft = nextScrollLeft
+      }
+
+      if ((options.behavior ?? 'smooth') === 'auto') {
+        setScrollLeft(nextScrollLeft)
+      }
+    },
+    [cardCount, layout.scrollRange, layout.stepDistance],
+  )
+
+  const controllerContextValue = useMemo(
+    () => ({
+      focusCard,
+    }),
+    [focusCard],
+  )
+
   const setControllerScroll = (nextValue) => {
     const scrollElement = scrollRef.current
     if (!scrollElement) {
@@ -208,65 +303,69 @@ export function OverlappingCardsScroll({
     : 'overlapping-cards-scroll'
 
   return (
-    <section className={containerClassName} aria-label={ariaLabel} ref={containerRef}>
-      <div
-        className="ocs-stage"
-        style={{
-          height: toCssDimension(cardHeight),
-        }}
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-      >
+    <OverlappingCardsScrollControllerContext.Provider value={controllerContextValue}>
+      <section className={containerClassName} aria-label={ariaLabel} ref={containerRef}>
         <div
-          className="ocs-track"
+          className="ocs-stage"
           style={{
             height: toCssDimension(cardHeight),
           }}
+          onWheel={handleWheel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
-          {cards.map((card, index) => {
-            let cardX
-
-            if (index <= activeIndex) {
-              cardX = index * layout.peek
-            } else {
-              cardX =
-                activeIndex * layout.peek +
-                layout.cardWidth +
-                (index - activeIndex - 1) * layout.peek
-            }
-
-            if (index === activeIndex + 1) {
-              cardX -= transitionProgress * (layout.cardWidth - layout.peek)
-            }
-
-            return (
-              <div
-                key={card.key ?? `ocs-card-${index}`}
-                className="ocs-card"
-                style={{
-                  width: `${layout.cardWidth}px`,
-                  height: toCssDimension(cardHeight),
-                  transform: `translate3d(${cardX}px, 0, 0)`,
-                }}
-              >
-                {card}
-              </div>
-            )
-          })}
-        </div>
-        <div className="ocs-scroll-region" ref={scrollRef}>
           <div
-            className="ocs-scroll-spacer"
+            className="ocs-track"
             style={{
-              width: `${layout.trackWidth}px`,
               height: toCssDimension(cardHeight),
             }}
-          />
+          >
+            {cards.map((card, index) => {
+              let cardX
+
+              if (index <= activeIndex) {
+                cardX = index * layout.peek
+              } else {
+                cardX =
+                  activeIndex * layout.peek +
+                  layout.cardWidth +
+                  (index - activeIndex - 1) * layout.peek
+              }
+
+              if (index === activeIndex + 1) {
+                cardX -= transitionProgress * (layout.cardWidth - layout.peek)
+              }
+
+              return (
+                <div
+                  key={card.key ?? `ocs-card-${index}`}
+                  className="ocs-card"
+                  style={{
+                    width: `${layout.cardWidth}px`,
+                    height: toCssDimension(cardHeight),
+                    transform: `translate3d(${cardX}px, 0, 0)`,
+                  }}
+                >
+                  <OverlappingCardsScrollCardIndexContext.Provider value={index}>
+                    {card}
+                  </OverlappingCardsScrollCardIndexContext.Provider>
+                </div>
+              )
+            })}
+          </div>
+          <div className="ocs-scroll-region" ref={scrollRef}>
+            <div
+              className="ocs-scroll-spacer"
+              style={{
+                width: `${layout.trackWidth}px`,
+                height: toCssDimension(cardHeight),
+              }}
+            />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </OverlappingCardsScrollControllerContext.Provider>
   )
 }

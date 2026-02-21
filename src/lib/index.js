@@ -1,1 +1,4 @@
-export { OverlappingCardsScroll } from './OverlappingCardsScroll'
+export {
+  OverlappingCardsScroll,
+  OverlappingCardsScrollFocusTrigger,
+} from './OverlappingCardsScroll'

@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { OverlappingCardsScrollRN } from './OverlappingCardsScrollRN'
+import {
+  OverlappingCardsScrollRN,
+  OverlappingCardsScrollRNFocusTrigger,
+} from './OverlappingCardsScrollRN'
 
 const RN_DEMO_CARDS = [
   {
@@ -53,6 +56,7 @@ function RNCard({ tag, title, body, color }) {
       >
         <Text style={styles.counterText}>Clicks: {clickCount}</Text>
       </Pressable>
+      <OverlappingCardsScrollRNFocusTrigger>Make principal</OverlappingCardsScrollRNFocusTrigger>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.body}>{body}</Text>
     </View>
