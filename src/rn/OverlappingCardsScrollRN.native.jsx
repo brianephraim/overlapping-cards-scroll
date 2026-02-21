@@ -8,13 +8,33 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 const PAGE_DOT_POSITIONS = new Set(['above', 'below', 'overlay'])
 
 const normalizePageDotsPosition = (value) =>
   PAGE_DOT_POSITIONS.has(value) ? value : 'below'
+
+const resolveCardXAtProgress = (index, progress, layout) => {
+  const principalIndex = Math.floor(progress)
+  const transitionProgress = progress - principalIndex
+
+  if (index <= principalIndex) {
+    return index * layout.peek
+  }
+
+  let cardX =
+    principalIndex * layout.peek +
+    layout.cardWidth +
+    (index - principalIndex - 1) * layout.peek
+
+  if (index === principalIndex + 1) {
+    cardX -= transitionProgress * (layout.cardWidth - layout.peek)
+  }
+
+  return cardX
+}
 
 const OverlappingCardsScrollRNControllerContext = createContext(null)
 const OverlappingCardsScrollRNCardIndexContext = createContext(null)
@@ -45,6 +65,7 @@ export function OverlappingCardsScrollRNFocusTrigger({
   children = 'Make principal',
   style,
   textStyle,
+  transitionMode = 'swoop',
   onPress,
   ...pressableProps
 }) {
@@ -52,7 +73,7 @@ export function OverlappingCardsScrollRNFocusTrigger({
 
   const handlePress = (event) => {
     onPress?.(event)
-    focusCard({ animated: true })
+    focusCard({ animated: true, transitionMode })
   }
 
   return (
@@ -104,6 +125,7 @@ export function OverlappingCardsScrollRN({
   showPageDots = false,
   pageDotsPosition = 'below',
   pageDotsOffset = 10,
+  focusTransitionDuration = 420,
 }) {
   const cards = useMemo(() => Children.toArray(children), [children])
   const cardCount = cards.length
@@ -111,8 +133,11 @@ export function OverlappingCardsScrollRN({
   const scrollRef = useRef(null)
   const scrollX = useRef(new Animated.Value(0)).current
   const scrollXValueRef = useRef(0)
+  const focusTransitionProgress = useRef(new Animated.Value(1)).current
+  const focusTransitionAnimationRef = useRef(null)
 
   const [viewportWidth, setViewportWidth] = useState(1)
+  const [focusTransition, setFocusTransition] = useState(null)
 
   const layout = useMemo(() => {
     const safeWidth = Math.max(1, viewportWidth)
@@ -146,6 +171,19 @@ export function OverlappingCardsScrollRN({
     }
   }, [basePeek, cardCount, cardWidth, cardWidthRatio, maxPeek, minPeek, viewportWidth])
 
+  const stopFocusTransitionAnimation = useCallback(() => {
+    if (focusTransitionAnimationRef.current) {
+      focusTransitionAnimationRef.current.stop()
+      focusTransitionAnimationRef.current = null
+    }
+    focusTransitionProgress.stopAnimation()
+  }, [focusTransitionProgress])
+
+  const cancelFocusTransition = useCallback(() => {
+    stopFocusTransitionAnimation()
+    setFocusTransition(null)
+  }, [stopFocusTransitionAnimation])
+
   useEffect(() => {
     const id = scrollX.addListener(({ value }) => {
       scrollXValueRef.current = value
@@ -155,6 +193,16 @@ export function OverlappingCardsScrollRN({
       scrollX.removeListener(id)
     }
   }, [scrollX])
+
+  useEffect(() => () => stopFocusTransitionAnimation(), [stopFocusTransitionAnimation])
+
+  useEffect(() => {
+    if (cardCount > 1) {
+      return
+    }
+
+    cancelFocusTransition()
+  }, [cancelFocusTransition, cardCount])
 
   useEffect(() => {
     if (!scrollRef.current) {
@@ -185,7 +233,53 @@ export function OverlappingCardsScrollRN({
 
       const safeIndex = clamp(Math.round(targetIndex), 0, cardCount - 1)
       const nextScrollLeft = clamp(safeIndex * layout.stepDistance, 0, layout.scrollRange)
+      const transitionMode = options.transitionMode ?? 'swoop'
 
+      if (transitionMode === 'swoop' && cardCount > 1) {
+        const fromProgress = clamp(
+          scrollXValueRef.current / layout.stepDistance,
+          0,
+          cardCount - 1,
+        )
+        const toProgress = safeIndex
+        const duration = Number.isFinite(options.duration)
+          ? Math.max(0, options.duration)
+          : focusTransitionDuration
+
+        stopFocusTransitionAnimation()
+        focusTransitionProgress.setValue(0)
+        setFocusTransition({ fromProgress, toProgress })
+
+        scrollElement.scrollTo({
+          x: nextScrollLeft,
+          y: 0,
+          animated: false,
+        })
+        scrollX.setValue(nextScrollLeft)
+        scrollXValueRef.current = nextScrollLeft
+
+        if (duration <= 0 || Math.abs(toProgress - fromProgress) < 0.001) {
+          setFocusTransition(null)
+          focusTransitionProgress.setValue(1)
+          return
+        }
+
+        focusTransitionAnimationRef.current = Animated.timing(focusTransitionProgress, {
+          toValue: 1,
+          duration,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        })
+
+        focusTransitionAnimationRef.current.start(() => {
+          focusTransitionAnimationRef.current = null
+          focusTransitionProgress.setValue(1)
+          setFocusTransition(null)
+        })
+        return
+      }
+
+      cancelFocusTransition()
       scrollElement.scrollTo({
         x: nextScrollLeft,
         y: 0,
@@ -197,7 +291,16 @@ export function OverlappingCardsScrollRN({
         scrollXValueRef.current = nextScrollLeft
       }
     },
-    [cardCount, layout.scrollRange, layout.stepDistance, scrollX],
+    [
+      cancelFocusTransition,
+      cardCount,
+      focusTransitionDuration,
+      focusTransitionProgress,
+      layout.scrollRange,
+      layout.stepDistance,
+      scrollX,
+      stopFocusTransitionAnimation,
+    ],
   )
 
   const controllerContextValue = useMemo(
@@ -250,7 +353,7 @@ export function OverlappingCardsScrollRN({
             <Pressable
               key={`rn-ocs-page-dot-${placement}-${index}`}
               accessibilityLabel={`Go to card ${index + 1}`}
-              onPress={() => focusCard(index, { animated: true })}
+              onPress={() => focusCard(index, { animated: true, transitionMode: 'swoop' })}
               style={styles.pageDotPressable}
             >
               <Animated.View style={[styles.pageDot, { opacity, transform: [{ scale }] }]} />
@@ -278,6 +381,8 @@ export function OverlappingCardsScrollRN({
             style={[styles.scrollRegion, { height: cardHeight }]}
             contentContainerStyle={{ width: layout.trackWidth, height: cardHeight }}
             onScroll={onScroll}
+            onScrollBeginDrag={cancelFocusTransition}
+            onMomentumScrollBegin={cancelFocusTransition}
             scrollEventThrottle={16}
             showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
             snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
@@ -290,7 +395,7 @@ export function OverlappingCardsScrollRN({
                 const restingRightX = index === 0 ? 0 : (index - 1) * layout.peek + layout.cardWidth
                 const restingLeftX = index * layout.peek
 
-                const animatedCardX =
+                const cardXDuringNormalScroll =
                   index === 0
                     ? 0
                     : scrollX.interpolate({
@@ -301,6 +406,19 @@ export function OverlappingCardsScrollRN({
                         outputRange: [restingRightX, restingLeftX],
                         extrapolate: 'clamp',
                       })
+
+                const cardXDuringFocusTransition = focusTransition
+                  ? focusTransitionProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [
+                        resolveCardXAtProgress(index, focusTransition.fromProgress, layout),
+                        resolveCardXAtProgress(index, focusTransition.toProgress, layout),
+                      ],
+                      extrapolate: 'clamp',
+                    })
+                  : null
+
+                const animatedCardX = cardXDuringFocusTransition ?? cardXDuringNormalScroll
 
                 return (
                   <Animated.View
