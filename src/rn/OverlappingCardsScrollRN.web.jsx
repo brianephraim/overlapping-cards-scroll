@@ -40,6 +40,7 @@ export function OverlappingCardsScrollRN({
   pageDotsBehavior = 'smooth',
   snapToCardOnRelease = true,
   snapReleaseDelay = 800,
+  focusTransitionDuration = 420,
 }) {
   return (
     <View style={[styles.root, style]}>
@@ -56,6 +57,7 @@ export function OverlappingCardsScrollRN({
         pageDotsBehavior={pageDotsBehavior}
         snapToCardOnRelease={snapToCardOnRelease}
         snapReleaseDelay={snapReleaseDelay}
+        focusTransitionDuration={focusTransitionDuration}
       >
         {children}
       </OverlappingCardsScroll>

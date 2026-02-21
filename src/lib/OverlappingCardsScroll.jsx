@@ -18,6 +18,23 @@ const PAGE_DOT_POSITIONS = new Set(['above', 'below', 'overlay'])
 const normalizePageDotsPosition = (value) =>
   PAGE_DOT_POSITIONS.has(value) ? value : 'below'
 
+const resolveCardX = (index, principalIndex, transitionProgress, layout) => {
+  if (index <= principalIndex) {
+    return index * layout.peek
+  }
+
+  let cardX =
+    principalIndex * layout.peek +
+    layout.cardWidth +
+    (index - principalIndex - 1) * layout.peek
+
+  if (index === principalIndex + 1) {
+    cardX -= transitionProgress * (layout.cardWidth - layout.peek)
+  }
+
+  return cardX
+}
+
 const OverlappingCardsScrollControllerContext = createContext(null)
 const OverlappingCardsScrollCardIndexContext = createContext(null)
 
@@ -47,6 +64,7 @@ export function OverlappingCardsScrollFocusTrigger({
   children = 'Make principal',
   className = '',
   behavior = 'smooth',
+  transitionMode = 'swoop',
   onClick,
   ...buttonProps
 }) {
@@ -56,7 +74,7 @@ export function OverlappingCardsScrollFocusTrigger({
     onClick?.(event)
 
     if (!event.defaultPrevented) {
-      focusCard({ behavior })
+      focusCard({ behavior, transitionMode })
     }
   }
 
@@ -110,6 +128,7 @@ export function OverlappingCardsScroll({
   pageDotsClassName = '',
   snapToCardOnRelease = true,
   snapReleaseDelay = 800,
+  focusTransitionDuration = 420,
   ariaLabel = 'Overlapping cards scroll',
 }) {
   const cards = useMemo(() => Children.toArray(children), [children])
@@ -120,9 +139,11 @@ export function OverlappingCardsScroll({
   const touchStateRef = useRef(null)
   const snapTimeoutRef = useRef(null)
   const shouldSnapOnMouseMoveRef = useRef(false)
+  const focusTransitionTimeoutRef = useRef(null)
 
   const [viewportWidth, setViewportWidth] = useState(1)
   const [scrollLeft, setScrollLeft] = useState(0)
+  const [focusTransition, setFocusTransition] = useState(null)
 
   const clearSnapTimeout = useCallback(() => {
     if (snapTimeoutRef.current !== null) {
@@ -130,6 +151,18 @@ export function OverlappingCardsScroll({
       snapTimeoutRef.current = null
     }
   }, [])
+
+  const clearFocusTransitionTimeout = useCallback(() => {
+    if (focusTransitionTimeoutRef.current !== null) {
+      clearTimeout(focusTransitionTimeoutRef.current)
+      focusTransitionTimeoutRef.current = null
+    }
+  }, [])
+
+  const cancelFocusTransition = useCallback(() => {
+    clearFocusTransitionTimeout()
+    setFocusTransition(null)
+  }, [clearFocusTransitionTimeout])
 
   useEffect(() => {
     const containerElement = containerRef.current
@@ -162,6 +195,7 @@ export function OverlappingCardsScroll({
   }, [])
 
   useEffect(() => () => clearSnapTimeout(), [clearSnapTimeout])
+  useEffect(() => () => clearFocusTransitionTimeout(), [clearFocusTransitionTimeout])
 
   useEffect(() => {
     if (snapToCardOnRelease && cardCount > 1) {
@@ -170,7 +204,16 @@ export function OverlappingCardsScroll({
 
     clearSnapTimeout()
     shouldSnapOnMouseMoveRef.current = false
-  }, [cardCount, clearSnapTimeout, snapToCardOnRelease])
+    cancelFocusTransition()
+  }, [cancelFocusTransition, cardCount, clearSnapTimeout, snapToCardOnRelease])
+
+  useEffect(() => {
+    if (cardCount > 1) {
+      return
+    }
+
+    cancelFocusTransition()
+  }, [cancelFocusTransition, cardCount])
 
   const layout = useMemo(() => {
     const safeWidth = Math.max(1, viewportWidth)
@@ -321,9 +364,34 @@ export function OverlappingCardsScroll({
 
       clearSnapTimeout()
       shouldSnapOnMouseMoveRef.current = false
+      cancelFocusTransition()
 
       const safeIndex = clamp(Math.round(targetIndex), 0, cardCount - 1)
       const nextScrollLeft = clamp(safeIndex * layout.stepDistance, 0, layout.scrollRange)
+      const transitionMode = options.transitionMode ?? 'swoop'
+
+      if (transitionMode === 'swoop') {
+        const duration = Number.isFinite(options.duration)
+          ? Math.max(0, options.duration)
+          : focusTransitionDuration
+
+        clearFocusTransitionTimeout()
+        setFocusTransition({ duration })
+
+        scrollElement.scrollLeft = nextScrollLeft
+        setScrollLeft(nextScrollLeft)
+
+        if (duration <= 0) {
+          setFocusTransition(null)
+          return
+        }
+
+        focusTransitionTimeoutRef.current = setTimeout(() => {
+          focusTransitionTimeoutRef.current = null
+          setFocusTransition(null)
+        }, duration + 40)
+        return
+      }
 
       if (typeof scrollElement.scrollTo === 'function') {
         scrollElement.scrollTo({
@@ -338,7 +406,15 @@ export function OverlappingCardsScroll({
         setScrollLeft(nextScrollLeft)
       }
     },
-    [cardCount, clearSnapTimeout, layout.scrollRange, layout.stepDistance],
+    [
+      cardCount,
+      cancelFocusTransition,
+      clearFocusTransitionTimeout,
+      clearSnapTimeout,
+      focusTransitionDuration,
+      layout.scrollRange,
+      layout.stepDistance,
+    ],
   )
 
   const controllerContextValue = useMemo(
@@ -383,6 +459,7 @@ export function OverlappingCardsScroll({
     }
 
     event.preventDefault()
+    cancelFocusTransition()
     applyScrollDelta(delta)
     markSnapCandidateFromScroll()
   }
@@ -397,6 +474,8 @@ export function OverlappingCardsScroll({
     if (!scrollElement || !touch) {
       return
     }
+
+    cancelFocusTransition()
 
     touchStateRef.current = {
       startX: touch.clientX,
@@ -459,7 +538,12 @@ export function OverlappingCardsScroll({
                   className="ocs-page-dot"
                   aria-label={`Go to card ${index + 1}`}
                   aria-current={influence > 0.98 ? 'page' : undefined}
-                  onClick={() => focusCard(index, { behavior: pageDotsBehavior })}
+                  onClick={() =>
+                    focusCard(index, {
+                      behavior: pageDotsBehavior,
+                      transitionMode: 'swoop',
+                    })
+                  }
                   style={{ opacity, transform: `scale(${scale})` }}
                 />
               )
@@ -485,29 +569,17 @@ export function OverlappingCardsScroll({
               }}
             >
               {cards.map((card, index) => {
-                let cardX
-
-                if (index <= activeIndex) {
-                  cardX = index * layout.peek
-                } else {
-                  cardX =
-                    activeIndex * layout.peek +
-                    layout.cardWidth +
-                    (index - activeIndex - 1) * layout.peek
-                }
-
-                if (index === activeIndex + 1) {
-                  cardX -= transitionProgress * (layout.cardWidth - layout.peek)
-                }
+                const cardX = resolveCardX(index, activeIndex, transitionProgress, layout)
 
                 return (
                   <div
                     key={card.key ?? `ocs-card-${index}`}
-                    className="ocs-card"
+                    className={focusTransition ? 'ocs-card ocs-card--focus-transition' : 'ocs-card'}
                     style={{
                       width: `${layout.cardWidth}px`,
                       height: toCssDimension(cardHeight),
                       transform: `translate3d(${cardX}px, 0, 0)`,
+                      transitionDuration: focusTransition ? `${focusTransition.duration}ms` : undefined,
                     }}
                   >
                     <OverlappingCardsScrollCardIndexContext.Provider value={index}>
@@ -549,7 +621,12 @@ export function OverlappingCardsScroll({
                     className="ocs-page-dot"
                     aria-label={`Go to card ${index + 1}`}
                     aria-current={influence > 0.98 ? 'page' : undefined}
-                    onClick={() => focusCard(index, { behavior: pageDotsBehavior })}
+                    onClick={() =>
+                      focusCard(index, {
+                        behavior: pageDotsBehavior,
+                        transitionMode: 'swoop',
+                      })
+                    }
                     style={{ opacity, transform: `scale(${scale})` }}
                   />
                 )
@@ -579,7 +656,12 @@ export function OverlappingCardsScroll({
                   className="ocs-page-dot"
                   aria-label={`Go to card ${index + 1}`}
                   aria-current={influence > 0.98 ? 'page' : undefined}
-                  onClick={() => focusCard(index, { behavior: pageDotsBehavior })}
+                  onClick={() =>
+                    focusCard(index, {
+                      behavior: pageDotsBehavior,
+                      transitionMode: 'swoop',
+                    })
+                  }
                   style={{ opacity, transform: `scale(${scale})` }}
                 />
               )

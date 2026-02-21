@@ -59,6 +59,11 @@
   will-change: transform;
 }
 
+.ocs-card--focus-transition {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
 .ocs-card > * {
   width: 100%;
   height: 100%;
