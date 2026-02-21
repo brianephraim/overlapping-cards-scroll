@@ -13,6 +13,7 @@ node_modules
 # Build outputs
 dist
 dist-ssr
+web-build
 
 # Environment and local overrides
 .env
@@ -27,6 +28,8 @@ coverage
 # Tool caches
 .cache
 .eslintcache
+.expo
+.expo-shared
 
 # Editor directories and files
 .vscode/*

@@ -2,22 +2,26 @@
   "name": "overlapping-cards-scroll",
   "private": true,
   "version": "0.0.0",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:expo": "expo start",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+  "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "expo": "^54.0.33",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
