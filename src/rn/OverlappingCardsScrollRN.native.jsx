@@ -1,5 +1,5 @@
 import { Children, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Platform, StyleSheet, View } from 'react-native'
+import { Animated, StyleSheet, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
@@ -79,7 +79,7 @@ export function OverlappingCardsScrollRN({
   const onScroll = useMemo(
     () =>
       Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-        useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: true,
       }),
     [scrollX],
   )
