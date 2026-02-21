@@ -3,14 +3,23 @@
   min-width: 0;
 }
 
+.ocs-stage {
+  width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
 .ocs-scroll-region {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0.4rem;
+  background: transparent;
 }
 
 .ocs-scroll-region::-webkit-scrollbar {
@@ -24,6 +33,13 @@
 
 .ocs-track {
   position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.ocs-scroll-spacer {
   min-height: 1px;
 }
 

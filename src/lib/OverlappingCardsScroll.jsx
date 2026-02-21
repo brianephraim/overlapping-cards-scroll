@@ -109,11 +109,15 @@ export function OverlappingCardsScroll({
 
   return (
     <section className={containerClassName} aria-label={ariaLabel} ref={containerRef}>
-      <div className="ocs-scroll-region" ref={scrollRef}>
+      <div
+        className="ocs-stage"
+        style={{
+          height: toCssDimension(cardHeight),
+        }}
+      >
         <div
           className="ocs-track"
           style={{
-            width: `${layout.trackWidth}px`,
             height: toCssDimension(cardHeight),
           }}
         >
@@ -140,13 +144,22 @@ export function OverlappingCardsScroll({
                 style={{
                   width: `${layout.cardWidth}px`,
                   height: toCssDimension(cardHeight),
-                  transform: `translate3d(${scrollLeft + cardX}px, 0, 0)`,
+                  transform: `translate3d(${cardX}px, 0, 0)`,
                 }}
               >
                 {card}
               </div>
             )
           })}
+        </div>
+        <div className="ocs-scroll-region" ref={scrollRef}>
+          <div
+            className="ocs-scroll-spacer"
+            style={{
+              width: `${layout.trackWidth}px`,
+              height: toCssDimension(cardHeight),
+            }}
+          />
         </div>
       </div>
     </section>
