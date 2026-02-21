@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { OverlappingCardsScroll } from './lib'
+import { RNWebDemo } from './rn/RNWebDemo'
 import './App.css'
 
 const DEMO_PAGES = {
@@ -20,6 +21,12 @@ const DEMO_PAGES = {
     title: 'Many-Card Stack',
     description:
       'A larger deck to verify left-edge visibility and spacing when many cards share the same container.',
+  },
+  rnweb: {
+    label: 'RN Web',
+    title: 'React Native Web Implementation',
+    description:
+      'Prototype built with react-native primitives (View/Text/ScrollView) for easier Expo-native follow-up.',
   },
 }
 
@@ -164,6 +171,10 @@ function StressCard({ index }) {
 }
 
 function DemoStage({ pageId }) {
+  if (pageId === 'rnweb') {
+    return <RNWebDemo />
+  }
+
   if (pageId === 'content') {
     return (
       <OverlappingCardsScroll cardHeight={320} basePeek={68}>
