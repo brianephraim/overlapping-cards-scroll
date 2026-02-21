@@ -3,10 +3,34 @@ import { Animated, StyleSheet, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
+const resolveCardWidth = (cardWidth, viewportWidth, fallbackRatio) => {
+  if (typeof cardWidth === 'number' && Number.isFinite(cardWidth) && cardWidth > 0) {
+    return cardWidth
+  }
+
+  if (typeof cardWidth === 'string') {
+    const value = cardWidth.trim()
+    if (value.endsWith('%')) {
+      const percent = Number.parseFloat(value.slice(0, -1))
+      if (Number.isFinite(percent) && percent > 0) {
+        return (viewportWidth * percent) / 100
+      }
+    }
+
+    const numeric = Number.parseFloat(value)
+    if (Number.isFinite(numeric) && numeric > 0) {
+      return numeric
+    }
+  }
+
+  return viewportWidth * fallbackRatio
+}
+
 export function OverlappingCardsScrollRN({
   children,
   style,
   cardHeight = 300,
+  cardWidth,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
@@ -25,11 +49,11 @@ export function OverlappingCardsScrollRN({
   const layout = useMemo(() => {
     const safeWidth = Math.max(1, viewportWidth)
     const safeRatio = clamp(cardWidthRatio, 0.2, 0.95)
-    const cardWidth = safeWidth * safeRatio
+    const resolvedCardWidth = Math.max(1, resolveCardWidth(cardWidth, safeWidth, safeRatio))
 
     if (cardCount < 2) {
       return {
-        cardWidth,
+        cardWidth: resolvedCardWidth,
         peek: 0,
         stepDistance: 1,
         scrollRange: 0,
@@ -37,22 +61,22 @@ export function OverlappingCardsScrollRN({
       }
     }
 
-    const availableStackWidth = Math.max(0, safeWidth - cardWidth)
+    const availableStackWidth = Math.max(0, safeWidth - resolvedCardWidth)
     const preferredPeek = clamp(basePeek, minPeek, maxPeek)
     const maxVisiblePeek = availableStackWidth / (cardCount - 1)
     const peek = Math.min(preferredPeek, maxVisiblePeek)
 
-    const stepDistance = Math.max(1, cardWidth - peek)
+    const stepDistance = Math.max(1, resolvedCardWidth - peek)
     const scrollRange = stepDistance * (cardCount - 1)
 
     return {
-      cardWidth,
+      cardWidth: resolvedCardWidth,
       peek,
       stepDistance,
       scrollRange,
       trackWidth: safeWidth + scrollRange,
     }
-  }, [basePeek, cardCount, cardWidthRatio, maxPeek, minPeek, viewportWidth])
+  }, [basePeek, cardCount, cardWidth, cardWidthRatio, maxPeek, minPeek, viewportWidth])
 
   useEffect(() => {
     const id = scrollX.addListener(({ value }) => {

@@ -5,6 +5,7 @@ export function OverlappingCardsScrollRN({
   children,
   style,
   cardHeight = 300,
+  cardWidth,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
@@ -14,6 +15,7 @@ export function OverlappingCardsScrollRN({
     <View style={[styles.root, style]}>
       <OverlappingCardsScroll
         cardHeight={cardHeight}
+        cardWidth={cardWidth}
         cardWidthRatio={cardWidthRatio}
         basePeek={basePeek}
         minPeek={minPeek}

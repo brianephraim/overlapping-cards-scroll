@@ -5,10 +5,34 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 const toCssDimension = (value) => (typeof value === 'number' ? `${value}px` : value)
 
+const resolveCardWidth = (cardWidth, viewportWidth, fallbackRatio) => {
+  if (typeof cardWidth === 'number' && Number.isFinite(cardWidth) && cardWidth > 0) {
+    return cardWidth
+  }
+
+  if (typeof cardWidth === 'string') {
+    const value = cardWidth.trim()
+    if (value.endsWith('%')) {
+      const percent = Number.parseFloat(value.slice(0, -1))
+      if (Number.isFinite(percent) && percent > 0) {
+        return (viewportWidth * percent) / 100
+      }
+    }
+
+    const numeric = Number.parseFloat(value)
+    if (Number.isFinite(numeric) && numeric > 0) {
+      return numeric
+    }
+  }
+
+  return viewportWidth * fallbackRatio
+}
+
 export function OverlappingCardsScroll({
   children,
   className = '',
   cardHeight = 300,
+  cardWidth,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
@@ -58,7 +82,7 @@ export function OverlappingCardsScroll({
   const layout = useMemo(() => {
     const safeWidth = Math.max(1, viewportWidth)
     const safeRatio = clamp(cardWidthRatio, 0.2, 0.95)
-    const width = safeWidth * safeRatio
+    const width = Math.max(1, resolveCardWidth(cardWidth, safeWidth, safeRatio))
 
     if (cardCount < 2) {
       return {
@@ -86,7 +110,7 @@ export function OverlappingCardsScroll({
       scrollRange,
       trackWidth,
     }
-  }, [basePeek, cardCount, cardWidthRatio, maxPeek, minPeek, viewportWidth])
+  }, [basePeek, cardCount, cardWidth, cardWidthRatio, maxPeek, minPeek, viewportWidth])
 
   useEffect(() => {
     const scrollElement = scrollRef.current

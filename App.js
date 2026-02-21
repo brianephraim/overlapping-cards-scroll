@@ -71,6 +71,44 @@ const STRESS_CARDS = Array.from({ length: STRESS_CARD_COUNT }, (_, index) => {
   }
 })
 
+const WIDTH_EXAMPLE_CARDS = [
+  {
+    id: 'width-1',
+    tag: 'Card A',
+    title: 'Width Example A',
+    body: 'Card width example set.',
+    color: '#0f8b8d',
+  },
+  {
+    id: 'width-2',
+    tag: 'Card B',
+    title: 'Width Example B',
+    body: 'Compare how overlap changes per width.',
+    color: '#f4a261',
+  },
+  {
+    id: 'width-3',
+    tag: 'Card C',
+    title: 'Width Example C',
+    body: 'Each deck uses the same content, only width changes.',
+    color: '#3a86ff',
+  },
+  {
+    id: 'width-4',
+    tag: 'Card D',
+    title: 'Width Example D',
+    body: 'Useful for tuning native layout targets.',
+    color: '#8338ec',
+  },
+]
+
+const IOS_WIDTH_EXAMPLES = [
+  { label: '50%', value: '50%' },
+  { label: '75%', value: '75%' },
+  { label: '150', value: 150 },
+  { label: '250', value: 250 },
+]
+
 function ExpoCard({ tag, title, body, color, scrollLines }) {
   const [clickCount, setClickCount] = useState(0)
 
@@ -126,6 +164,28 @@ export default function App() {
           ))}
         </OverlappingCardsScrollRN>
       </View>
+
+      {Platform.OS === 'ios' && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Card Width Examples (iOS)</Text>
+          <Text style={styles.sectionDescription}>Testing new `cardWidth` prop values.</Text>
+          {IOS_WIDTH_EXAMPLES.map((example) => (
+            <View key={`width-example-${example.label}`} style={styles.widthExample}>
+              <Text style={styles.widthExampleLabel}>cardWidth={example.label}</Text>
+              <OverlappingCardsScrollRN
+                cardHeight={360}
+                cardWidth={example.value}
+                basePeek={42}
+                minPeek={4}
+              >
+                {WIDTH_EXAMPLE_CARDS.map((card) => (
+                  <ExpoCard key={`${example.label}-${card.id}`} {...card} />
+                ))}
+              </OverlappingCardsScrollRN>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   )
 }
@@ -157,6 +217,16 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 26,
+  },
+  widthExample: {
+    marginBottom: 16,
+  },
+  widthExampleLabel: {
+    color: '#284a62',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   sectionTitle: {
     color: '#173047',
