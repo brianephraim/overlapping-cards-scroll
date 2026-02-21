@@ -108,6 +108,8 @@ export function OverlappingCardsScroll({
   pageDotsOffset = 10,
   pageDotsBehavior = 'smooth',
   pageDotsClassName = '',
+  snapToCardOnRelease = true,
+  snapReleaseDelay = 800,
   ariaLabel = 'Overlapping cards scroll',
 }) {
   const cards = useMemo(() => Children.toArray(children), [children])
@@ -116,9 +118,18 @@ export function OverlappingCardsScroll({
   const containerRef = useRef(null)
   const scrollRef = useRef(null)
   const touchStateRef = useRef(null)
+  const snapTimeoutRef = useRef(null)
+  const shouldSnapOnMouseMoveRef = useRef(false)
 
   const [viewportWidth, setViewportWidth] = useState(1)
   const [scrollLeft, setScrollLeft] = useState(0)
+
+  const clearSnapTimeout = useCallback(() => {
+    if (snapTimeoutRef.current !== null) {
+      clearTimeout(snapTimeoutRef.current)
+      snapTimeoutRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
     const containerElement = containerRef.current
@@ -149,6 +160,17 @@ export function OverlappingCardsScroll({
       scrollElement.removeEventListener('scroll', syncScroll)
     }
   }, [])
+
+  useEffect(() => () => clearSnapTimeout(), [clearSnapTimeout])
+
+  useEffect(() => {
+    if (snapToCardOnRelease && cardCount > 1) {
+      return
+    }
+
+    clearSnapTimeout()
+    shouldSnapOnMouseMoveRef.current = false
+  }, [cardCount, clearSnapTimeout, snapToCardOnRelease])
 
   const layout = useMemo(() => {
     const safeWidth = Math.max(1, viewportWidth)
@@ -199,12 +221,106 @@ export function OverlappingCardsScroll({
   const activeIndex = Math.floor(progress)
   const transitionProgress = progress - activeIndex
 
+  const snapToNearestCard = useCallback(
+    (options = {}) => {
+      if (!snapToCardOnRelease || cardCount < 2) {
+        return
+      }
+
+      const scrollElement = scrollRef.current
+      if (!scrollElement) {
+        return
+      }
+
+      const currentScrollLeft = clamp(scrollElement.scrollLeft, 0, layout.scrollRange)
+      const nearestIndex = clamp(
+        Math.round(currentScrollLeft / layout.stepDistance),
+        0,
+        cardCount - 1,
+      )
+      const targetScrollLeft = clamp(
+        nearestIndex * layout.stepDistance,
+        0,
+        layout.scrollRange,
+      )
+
+      if (Math.abs(targetScrollLeft - currentScrollLeft) < 1) {
+        return
+      }
+
+      const behavior = options.behavior ?? 'smooth'
+      if (typeof scrollElement.scrollTo === 'function') {
+        scrollElement.scrollTo({
+          left: targetScrollLeft,
+          behavior,
+        })
+      } else {
+        scrollElement.scrollLeft = targetScrollLeft
+      }
+
+      if (behavior === 'auto') {
+        setScrollLeft(targetScrollLeft)
+      }
+    },
+    [cardCount, layout.scrollRange, layout.stepDistance, snapToCardOnRelease],
+  )
+
+  const scheduleSnapToNearestCard = useCallback(
+    (delay = snapReleaseDelay) => {
+      if (!snapToCardOnRelease || cardCount < 2) {
+        return
+      }
+
+      const safeDelay = Number.isFinite(delay) ? Math.max(0, delay) : 800
+      clearSnapTimeout()
+      snapTimeoutRef.current = setTimeout(() => {
+        snapTimeoutRef.current = null
+        shouldSnapOnMouseMoveRef.current = false
+        snapToNearestCard({ behavior: 'smooth' })
+      }, safeDelay)
+    },
+    [cardCount, clearSnapTimeout, snapReleaseDelay, snapToCardOnRelease, snapToNearestCard],
+  )
+
+  const markSnapCandidateFromScroll = useCallback(() => {
+    if (!snapToCardOnRelease || cardCount < 2) {
+      return
+    }
+
+    shouldSnapOnMouseMoveRef.current = true
+    scheduleSnapToNearestCard()
+  }, [cardCount, scheduleSnapToNearestCard, snapToCardOnRelease])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !snapToCardOnRelease || cardCount < 2) {
+      return undefined
+    }
+
+    const handleMouseMove = () => {
+      if (!shouldSnapOnMouseMoveRef.current) {
+        return
+      }
+
+      shouldSnapOnMouseMoveRef.current = false
+      clearSnapTimeout()
+      snapToNearestCard({ behavior: 'smooth' })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [cardCount, clearSnapTimeout, snapToCardOnRelease, snapToNearestCard])
+
   const focusCard = useCallback(
     (targetIndex, options = {}) => {
       const scrollElement = scrollRef.current
       if (!scrollElement || cardCount === 0) {
         return
       }
+
+      clearSnapTimeout()
+      shouldSnapOnMouseMoveRef.current = false
 
       const safeIndex = clamp(Math.round(targetIndex), 0, cardCount - 1)
       const nextScrollLeft = clamp(safeIndex * layout.stepDistance, 0, layout.scrollRange)
@@ -222,7 +338,7 @@ export function OverlappingCardsScroll({
         setScrollLeft(nextScrollLeft)
       }
     },
-    [cardCount, layout.scrollRange, layout.stepDistance],
+    [cardCount, clearSnapTimeout, layout.scrollRange, layout.stepDistance],
   )
 
   const controllerContextValue = useMemo(
@@ -268,6 +384,7 @@ export function OverlappingCardsScroll({
 
     event.preventDefault()
     applyScrollDelta(delta)
+    markSnapCandidateFromScroll()
   }
 
   const handleTouchStart = (event) => {
@@ -301,9 +418,13 @@ export function OverlappingCardsScroll({
 
     event.preventDefault()
     setControllerScroll(touchState.startScrollLeft + delta)
+    markSnapCandidateFromScroll()
   }
 
   const handleTouchEnd = () => {
+    if (touchStateRef.current && snapToCardOnRelease && cardCount > 1) {
+      scheduleSnapToNearestCard(80)
+    }
     touchStateRef.current = null
   }
 
