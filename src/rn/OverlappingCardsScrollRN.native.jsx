@@ -1,5 +1,5 @@
 import { Children, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, StyleSheet, View } from 'react-native'
+import { Animated, Platform, StyleSheet, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
@@ -36,6 +36,7 @@ export function OverlappingCardsScrollRN({
   minPeek = 10,
   maxPeek = 84,
   showsHorizontalScrollIndicator = true,
+  snapToCardOnRelease = true,
 }) {
   const cards = useMemo(() => Children.toArray(children), [children])
   const cardCount = cards.length
@@ -108,6 +109,9 @@ export function OverlappingCardsScrollRN({
     [scrollX],
   )
 
+  const shouldSnapToCard =
+    snapToCardOnRelease && Platform.OS === 'ios' && cardCount > 1 && layout.stepDistance > 1
+
   return (
     <View
       style={[styles.root, style, { height: cardHeight }]}
@@ -124,6 +128,10 @@ export function OverlappingCardsScrollRN({
         onScroll={onScroll}
         scrollEventThrottle={16}
         showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
+        snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
+        snapToAlignment={shouldSnapToCard ? 'start' : undefined}
+        decelerationRate={shouldSnapToCard ? 'fast' : 'normal'}
+        disableIntervalMomentum={shouldSnapToCard}
       >
         <View style={[styles.track, { width: layout.trackWidth, height: cardHeight }]}>
           {cards.map((card, index) => {
