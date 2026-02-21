@@ -33,6 +33,20 @@ const EXPO_CARDS = [
   },
 ]
 
+const STRESS_CARD_COUNT = 14
+
+const STRESS_CARDS = Array.from({ length: STRESS_CARD_COUNT }, (_, index) => {
+  const hue = (index * 24) % 360
+
+  return {
+    id: `stress-${index + 1}`,
+    tag: `Card ${String(index + 1).padStart(2, '0')}`,
+    title: `Stress Position #${index + 1}`,
+    body: 'Stress scenario with a dense stack to validate clipping, layering, and scroll progression.',
+    color: `hsl(${hue}, 65%, 45%)`,
+  }
+})
+
 function ExpoCard({ tag, title, body, color }) {
   const [clickCount, setClickCount] = useState(0)
 
@@ -53,14 +67,42 @@ function ExpoCard({ tag, title, body, color }) {
 }
 
 export default function App() {
+  const [mode, setMode] = useState('default')
   const demoCardHeight = Platform.OS === 'ios' ? 500 : 250
+  const activeMode = Platform.OS === 'ios' ? mode : 'default'
+  const activeCards = activeMode === 'stress' ? STRESS_CARDS : EXPO_CARDS
+  const activePeek = activeMode === 'stress' ? 46 : 58
+  const activeMinPeek = activeMode === 'stress' ? 4 : 10
 
   return (
     <View style={styles.root}>
       <Text style={styles.eyebrow}>Expo Development Target</Text>
       <Text style={styles.title}>OverlappingCardsScroll</Text>
-      <OverlappingCardsScrollRN cardHeight={demoCardHeight} basePeek={58}>
-        {EXPO_CARDS.map((card) => (
+      {Platform.OS === 'ios' && (
+        <View style={styles.modeSwitch}>
+          <Pressable
+            style={[styles.modeButton, activeMode === 'default' && styles.modeButtonActive]}
+            onPress={() => setMode('default')}
+          >
+            <Text style={[styles.modeButtonText, activeMode === 'default' && styles.modeButtonTextActive]}>
+              Demo
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.modeButton, activeMode === 'stress' && styles.modeButtonActive]}
+            onPress={() => setMode('stress')}
+          >
+            <Text style={[styles.modeButtonText, activeMode === 'stress' && styles.modeButtonTextActive]}>
+              Stress Test
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      {activeMode === 'stress' && (
+        <Text style={styles.modeHint}>iOS stress-test screen with 14 cards.</Text>
+      )}
+      <OverlappingCardsScrollRN cardHeight={demoCardHeight} basePeek={activePeek} minPeek={activeMinPeek}>
+        {activeCards.map((card) => (
           <ExpoCard key={card.id} {...card} />
         ))}
       </OverlappingCardsScrollRN>
@@ -89,6 +131,37 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     fontWeight: '700',
     marginBottom: 14,
+  },
+  modeSwitch: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  modeButton: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(27, 52, 78, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    marginRight: 8,
+  },
+  modeButtonActive: {
+    backgroundColor: '#173047',
+    borderColor: '#173047',
+  },
+  modeButtonText: {
+    color: '#284a62',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  modeButtonTextActive: {
+    color: '#f4f8ff',
+  },
+  modeHint: {
+    color: '#315570',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   card: {
     flex: 1,
