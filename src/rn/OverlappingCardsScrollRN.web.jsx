@@ -34,6 +34,10 @@ export function OverlappingCardsScrollRN({
   basePeek = 64,
   minPeek = 10,
   maxPeek = 84,
+  showPageDots = false,
+  pageDotsPosition = 'below',
+  pageDotsOffset = 10,
+  pageDotsBehavior = 'smooth',
 }) {
   return (
     <View style={[styles.root, style]}>
@@ -44,6 +48,10 @@ export function OverlappingCardsScrollRN({
         basePeek={basePeek}
         minPeek={minPeek}
         maxPeek={maxPeek}
+        showPageDots={showPageDots}
+        pageDotsPosition={pageDotsPosition}
+        pageDotsOffset={pageDotsOffset}
+        pageDotsBehavior={pageDotsBehavior}
       >
         {children}
       </OverlappingCardsScroll>

@@ -67,7 +67,14 @@ export function RNWebDemo() {
   return (
     <View style={styles.root}>
       <Text style={styles.helperText}>React Native Web Prototype (View/Text/ScrollView)</Text>
-      <OverlappingCardsScrollRN cardHeight={260} basePeek={58} showsHorizontalScrollIndicator>
+      <OverlappingCardsScrollRN
+        cardHeight={260}
+        basePeek={58}
+        showPageDots
+        pageDotsPosition="below"
+        pageDotsOffset={10}
+        showsHorizontalScrollIndicator
+      >
         {RN_DEMO_CARDS.map((card) => (
           <RNCard key={card.id} {...card} />
         ))}

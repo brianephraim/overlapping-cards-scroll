@@ -11,6 +11,10 @@ import {
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
+const PAGE_DOT_POSITIONS = new Set(['above', 'below', 'overlay'])
+
+const normalizePageDotsPosition = (value) =>
+  PAGE_DOT_POSITIONS.has(value) ? value : 'below'
 
 const OverlappingCardsScrollRNControllerContext = createContext(null)
 const OverlappingCardsScrollRNCardIndexContext = createContext(null)
@@ -97,6 +101,9 @@ export function OverlappingCardsScrollRN({
   maxPeek = 84,
   showsHorizontalScrollIndicator = true,
   snapToCardOnRelease = true,
+  showPageDots = false,
+  pageDotsPosition = 'below',
+  pageDotsOffset = 10,
 }) {
   const cards = useMemo(() => Children.toArray(children), [children])
   const cardCount = cards.length
@@ -202,79 +209,140 @@ export function OverlappingCardsScrollRN({
 
   const shouldSnapToCard =
     snapToCardOnRelease && Platform.OS === 'ios' && cardCount > 1 && layout.stepDistance > 1
+  const resolvedPageDotsPosition = normalizePageDotsPosition(pageDotsPosition)
+  const showNavigationDots = showPageDots && cardCount > 1
+
+  const renderPageDots = (placement) => {
+    if (!showNavigationDots || resolvedPageDotsPosition !== placement) {
+      return null
+    }
+
+    const rowStyle =
+      placement === 'above'
+        ? [styles.pageDotsRow, { marginBottom: pageDotsOffset }]
+        : placement === 'below'
+          ? [styles.pageDotsRow, { marginTop: pageDotsOffset }]
+          : [styles.pageDotsRow, styles.pageDotsOverlay, { bottom: pageDotsOffset }]
+
+    return (
+      <View
+        pointerEvents={placement === 'overlay' ? 'box-none' : 'auto'}
+        style={rowStyle}
+      >
+        {cards.map((_, index) => {
+          const inputRange = [
+            (index - 1) * layout.stepDistance,
+            index * layout.stepDistance,
+            (index + 1) * layout.stepDistance,
+          ]
+          const opacity = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.25, 1, 0.25],
+            extrapolate: 'clamp',
+          })
+          const scale = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.9, 1.12, 0.9],
+            extrapolate: 'clamp',
+          })
+
+          return (
+            <Pressable
+              key={`rn-ocs-page-dot-${placement}-${index}`}
+              accessibilityLabel={`Go to card ${index + 1}`}
+              onPress={() => focusCard(index, { animated: true })}
+              style={styles.pageDotPressable}
+            >
+              <Animated.View style={[styles.pageDot, { opacity, transform: [{ scale }] }]} />
+            </Pressable>
+          )
+        })}
+      </View>
+    )
+  }
 
   return (
     <OverlappingCardsScrollRNControllerContext.Provider value={controllerContextValue}>
-      <View
-        style={[styles.root, style, { height: cardHeight }]}
-        onLayout={(event) => {
-          const width = event.nativeEvent.layout.width || 1
-          setViewportWidth(Math.max(1, width))
-        }}
-      >
-        <Animated.ScrollView
-          ref={scrollRef}
-          horizontal
-          style={[styles.scrollRegion, { height: cardHeight }]}
-          contentContainerStyle={{ width: layout.trackWidth, height: cardHeight }}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
-          snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
-          snapToAlignment={shouldSnapToCard ? 'start' : undefined}
-          decelerationRate={shouldSnapToCard ? 'fast' : 'normal'}
-          disableIntervalMomentum={shouldSnapToCard}
+      <View style={[styles.shell, style]}>
+        {renderPageDots('above')}
+        <View
+          style={[styles.root, { height: cardHeight }]}
+          onLayout={(event) => {
+            const width = event.nativeEvent.layout.width || 1
+            setViewportWidth(Math.max(1, width))
+          }}
         >
-          <View style={[styles.track, { width: layout.trackWidth, height: cardHeight }]}>
-            {cards.map((card, index) => {
-              const restingRightX = index === 0 ? 0 : (index - 1) * layout.peek + layout.cardWidth
-              const restingLeftX = index * layout.peek
+          <Animated.ScrollView
+            ref={scrollRef}
+            horizontal
+            style={[styles.scrollRegion, { height: cardHeight }]}
+            contentContainerStyle={{ width: layout.trackWidth, height: cardHeight }}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
+            snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
+            snapToAlignment={shouldSnapToCard ? 'start' : undefined}
+            decelerationRate={shouldSnapToCard ? 'fast' : 'normal'}
+            disableIntervalMomentum={shouldSnapToCard}
+          >
+            <View style={[styles.track, { width: layout.trackWidth, height: cardHeight }]}>
+              {cards.map((card, index) => {
+                const restingRightX = index === 0 ? 0 : (index - 1) * layout.peek + layout.cardWidth
+                const restingLeftX = index * layout.peek
 
-              const animatedCardX =
-                index === 0
-                  ? 0
-                  : scrollX.interpolate({
-                      inputRange:
-                        index === 1
-                          ? [0, layout.stepDistance]
-                          : [(index - 1) * layout.stepDistance, index * layout.stepDistance],
-                      outputRange: [restingRightX, restingLeftX],
-                      extrapolate: 'clamp',
-                    })
+                const animatedCardX =
+                  index === 0
+                    ? 0
+                    : scrollX.interpolate({
+                        inputRange:
+                          index === 1
+                            ? [0, layout.stepDistance]
+                            : [(index - 1) * layout.stepDistance, index * layout.stepDistance],
+                        outputRange: [restingRightX, restingLeftX],
+                        extrapolate: 'clamp',
+                      })
 
-              return (
-                <Animated.View
-                  key={card.key ?? `rn-ocs-card-${index}`}
-                  style={[
-                    styles.card,
-                    {
-                      width: layout.cardWidth,
-                      height: cardHeight,
-                      transform: [
-                        {
-                          translateX: Animated.add(scrollX, animatedCardX),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <OverlappingCardsScrollRNCardIndexContext.Provider value={index}>
-                    {card}
-                  </OverlappingCardsScrollRNCardIndexContext.Provider>
-                </Animated.View>
-              )
-            })}
-          </View>
-        </Animated.ScrollView>
+                return (
+                  <Animated.View
+                    key={card.key ?? `rn-ocs-card-${index}`}
+                    style={[
+                      styles.card,
+                      {
+                        width: layout.cardWidth,
+                        height: cardHeight,
+                        transform: [
+                          {
+                            translateX: Animated.add(scrollX, animatedCardX),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <OverlappingCardsScrollRNCardIndexContext.Provider value={index}>
+                      {card}
+                    </OverlappingCardsScrollRNCardIndexContext.Provider>
+                  </Animated.View>
+                )
+              })}
+            </View>
+          </Animated.ScrollView>
+          {renderPageDots('overlay')}
+        </View>
+        {renderPageDots('below')}
       </View>
     </OverlappingCardsScrollRNControllerContext.Provider>
   )
 }
 
 const styles = StyleSheet.create({
+  shell: {
+    width: '100%',
+    minWidth: 0,
+  },
   root: {
     width: '100%',
     minWidth: 0,
+    position: 'relative',
   },
   scrollRegion: {
     width: '100%',
@@ -288,6 +356,31 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     top: 0,
+  },
+  pageDotsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 6,
+  },
+  pageDotsOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
+  pageDotPressable: {
+    width: 16,
+    height: 16,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pageDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: '#1f4666',
   },
   focusTrigger: {
     alignSelf: 'flex-start',

@@ -3,6 +3,12 @@
   min-width: 0;
 }
 
+.ocs-stage-frame {
+  width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
 .ocs-stage {
   width: 100%;
   min-width: 0;
@@ -56,6 +62,48 @@
 .ocs-card > * {
   width: 100%;
   height: 100%;
+}
+
+.ocs-page-dots {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.ocs-page-dots--overlay {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.ocs-page-dot {
+  appearance: none;
+  width: 0.62rem;
+  height: 0.62rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #1f4666;
+  cursor: pointer;
+  transition: opacity 130ms ease, transform 130ms ease, filter 130ms ease;
+}
+
+.ocs-page-dot:hover {
+  filter: brightness(1.1);
+}
+
+.ocs-page-dot:focus-visible {
+  outline: 2px solid rgba(16, 57, 93, 0.52);
+  outline-offset: 2px;
 }
 
 .ocs-focus-trigger {

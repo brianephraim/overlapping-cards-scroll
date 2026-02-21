@@ -152,7 +152,14 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Normal Instance</Text>
         <Text style={styles.sectionDescription}>Base deck with nested vertical content inside card 2.</Text>
-        <OverlappingCardsScrollRN cardHeight={normalCardHeight} basePeek={58} minPeek={10}>
+        <OverlappingCardsScrollRN
+          cardHeight={normalCardHeight}
+          basePeek={58}
+          minPeek={10}
+          showPageDots
+          pageDotsPosition="above"
+          pageDotsOffset={8}
+        >
           {EXPO_CARDS.map((card) => (
             <ExpoCard key={card.id} {...card} />
           ))}
@@ -162,7 +169,14 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Stress Instance</Text>
         <Text style={styles.sectionDescription}>Dense 14-card stack for overlap and clipping verification.</Text>
-        <OverlappingCardsScrollRN cardHeight={stressCardHeight} basePeek={46} minPeek={4}>
+        <OverlappingCardsScrollRN
+          cardHeight={stressCardHeight}
+          basePeek={46}
+          minPeek={4}
+          showPageDots
+          pageDotsPosition="below"
+          pageDotsOffset={10}
+        >
           {STRESS_CARDS.map((card) => (
             <ExpoCard key={card.id} {...card} />
           ))}
@@ -181,6 +195,9 @@ export default function App() {
                 cardWidth={example.value}
                 basePeek={42}
                 minPeek={4}
+                showPageDots
+                pageDotsPosition="overlay"
+                pageDotsOffset={10}
               >
                 {WIDTH_EXAMPLE_CARDS.map((card) => (
                   <ExpoCard key={`${example.label}-${card.id}`} {...card} />

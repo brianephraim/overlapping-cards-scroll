@@ -186,7 +186,13 @@ function DemoStage({ pageId }) {
 
   if (pageId === 'content') {
     return (
-      <OverlappingCardsScroll cardHeight={320} basePeek={68}>
+      <OverlappingCardsScroll
+        cardHeight={320}
+        basePeek={68}
+        showPageDots
+        pageDotsPosition="above"
+        pageDotsOffset={10}
+      >
         {CONTENT_CARD_DATA.map((card) => (
           <ContentCard key={card.id} {...card} />
         ))}
@@ -196,7 +202,14 @@ function DemoStage({ pageId }) {
 
   if (pageId === 'stress') {
     return (
-      <OverlappingCardsScroll cardHeight={250} basePeek={58} minPeek={4}>
+      <OverlappingCardsScroll
+        cardHeight={250}
+        basePeek={58}
+        minPeek={4}
+        showPageDots
+        pageDotsPosition="below"
+        pageDotsOffset={12}
+      >
         {Array.from({ length: STRESS_CARD_COUNT }, (_, index) => (
           <StressCard key={`stress-${index}`} index={index} />
         ))}
@@ -205,7 +218,13 @@ function DemoStage({ pageId }) {
   }
 
   return (
-    <OverlappingCardsScroll cardHeight={280} basePeek={64}>
+    <OverlappingCardsScroll
+      cardHeight={280}
+      basePeek={64}
+      showPageDots
+      pageDotsPosition="overlay"
+      pageDotsOffset={10}
+    >
       {BASIC_CARD_DATA.map((card) => (
         <BasicCard key={card.id} {...card} />
       ))}
