@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { useState } from 'react'
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import { OverlappingCardsScrollRN } from './src/rn/OverlappingCardsScrollRN'
 
 const EXPO_CARDS = [
@@ -33,10 +34,18 @@ const EXPO_CARDS = [
 ]
 
 function ExpoCard({ tag, title, body, color }) {
+  const [clickCount, setClickCount] = useState(0)
+
   return (
     <View style={styles.card}>
       <View style={[styles.bar, { backgroundColor: color }]} />
       <Text style={styles.tag}>{tag}</Text>
+      <Pressable
+        style={styles.counter}
+        onPress={() => setClickCount((count) => count + 1)}
+      >
+        <Text style={styles.counterText}>Clicks: {clickCount}</Text>
+      </Pressable>
       <Text style={styles.cardTitle}>{title}</Text>
       <Text style={styles.cardBody}>{body}</Text>
     </View>
@@ -44,11 +53,13 @@ function ExpoCard({ tag, title, body, color }) {
 }
 
 export default function App() {
+  const demoCardHeight = Platform.OS === 'ios' ? 500 : 250
+
   return (
     <View style={styles.root}>
       <Text style={styles.eyebrow}>Expo Development Target</Text>
       <Text style={styles.title}>OverlappingCardsScroll</Text>
-      <OverlappingCardsScrollRN cardHeight={250} basePeek={58}>
+      <OverlappingCardsScrollRN cardHeight={demoCardHeight} basePeek={58}>
         {EXPO_CARDS.map((card) => (
           <ExpoCard key={card.id} {...card} />
         ))}
@@ -105,6 +116,22 @@ const styles = StyleSheet.create({
     color: '#4a6b84',
     fontWeight: '700',
     marginBottom: 4,
+  },
+  counter: {
+    alignSelf: 'flex-start',
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: 'rgba(30, 67, 99, 0.25)',
+    backgroundColor: '#f3f8ff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 6,
+  },
+  counterText: {
+    color: '#1f4666',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   cardTitle: {
     color: '#173047',

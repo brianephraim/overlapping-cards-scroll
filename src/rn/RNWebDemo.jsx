@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { useState } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { OverlappingCardsScrollRN } from './OverlappingCardsScrollRN'
 
 const RN_DEMO_CARDS = [
@@ -40,10 +41,18 @@ const RN_DEMO_CARDS = [
 ]
 
 function RNCard({ tag, title, body, color }) {
+  const [clickCount, setClickCount] = useState(0)
+
   return (
     <View style={styles.card}>
       <View style={[styles.bar, { backgroundColor: color }]} />
       <Text style={styles.tag}>{tag}</Text>
+      <Pressable
+        style={styles.counter}
+        onPress={() => setClickCount((count) => count + 1)}
+      >
+        <Text style={styles.counterText}>Clicks: {clickCount}</Text>
+      </Pressable>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.body}>{body}</Text>
     </View>
@@ -99,6 +108,22 @@ const styles = StyleSheet.create({
     color: '#4a6b84',
     fontWeight: '700',
     marginBottom: 4,
+  },
+  counter: {
+    alignSelf: 'flex-start',
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: 'rgba(30, 67, 99, 0.25)',
+    backgroundColor: '#f3f8ff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 6,
+  },
+  counterText: {
+    color: '#1f4666',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   title: {
     color: '#173047',
