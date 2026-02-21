@@ -1,6 +1,29 @@
 import { useState } from 'react'
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { OverlappingCardsScrollRN } from './src/rn/OverlappingCardsScrollRN'
+
+const LONG_SCROLL_LINES = [
+  'Line 01: Long-form content inside this card should scroll vertically.',
+  'Line 02: This verifies nested vertical scrolling within a horizontal deck.',
+  'Line 03: Keep dragging up and down inside the body region.',
+  'Line 04: Horizontal deck movement should remain independent.',
+  'Line 05: The card shell should stay fixed in the overlap stack.',
+  'Line 06: Only this text area should vertically scroll.',
+  'Line 07: This helps validate realistic card-heavy content.',
+  'Line 08: The stress deck below still checks edge visibility.',
+  'Line 09: Counters should continue incrementing on tap.',
+  'Line 10: Tap and scroll behaviors should coexist cleanly.',
+  'Line 11: This content intentionally exceeds visible height.',
+  'Line 12: Directional gestures should feel predictable on iOS.',
+  'Line 13: Overflow clipping remains active in stress mode.',
+  'Line 14: Card order and overlap math should remain stable.',
+  'Line 15: Motion should stay smooth as card focus changes.',
+  'Line 16: Continue scrolling to confirm no visual jitter.',
+  'Line 17: This line is filler for longer body testing.',
+  'Line 18: Another line to extend vertical content depth.',
+  'Line 19: Yet another line to support realistic payload size.',
+  'Line 20: End of the embedded vertical scroll test block.',
+]
 
 const EXPO_CARDS = [
   {
@@ -13,9 +36,10 @@ const EXPO_CARDS = [
   {
     id: 'expo-2',
     tag: 'Card 02',
-    title: 'Scroll Controlled',
-    body: 'Horizontal ScrollView offset controls the active transition between cards.',
+    title: 'Nested Scroll Content',
+    body: 'This card includes its own vertical ScrollView for long text.',
     color: '#f97316',
+    scrollLines: LONG_SCROLL_LINES,
   },
   {
     id: 'expo-3',
@@ -42,80 +66,79 @@ const STRESS_CARDS = Array.from({ length: STRESS_CARD_COUNT }, (_, index) => {
     id: `stress-${index + 1}`,
     tag: `Card ${String(index + 1).padStart(2, '0')}`,
     title: `Stress Position #${index + 1}`,
-    body: 'Stress scenario with a dense stack to validate clipping, layering, and scroll progression.',
+    body: 'Dense stack to validate clipping, layering, and scroll progression.',
     color: `hsl(${hue}, 65%, 45%)`,
   }
 })
 
-function ExpoCard({ tag, title, body, color }) {
+function ExpoCard({ tag, title, body, color, scrollLines }) {
   const [clickCount, setClickCount] = useState(0)
 
   return (
     <View style={styles.card}>
       <View style={[styles.bar, { backgroundColor: color }]} />
       <Text style={styles.tag}>{tag}</Text>
-      <Pressable
-        style={styles.counter}
-        onPress={() => setClickCount((count) => count + 1)}
-      >
+      <Pressable style={styles.counter} onPress={() => setClickCount((count) => count + 1)}>
         <Text style={styles.counterText}>Clicks: {clickCount}</Text>
       </Pressable>
       <Text style={styles.cardTitle}>{title}</Text>
       <Text style={styles.cardBody}>{body}</Text>
+      {scrollLines ? (
+        <View style={styles.innerScrollFrame}>
+          <ScrollView nestedScrollEnabled showsVerticalScrollIndicator contentContainerStyle={styles.innerScrollContent}>
+            {scrollLines.map((line, index) => (
+              <Text key={`line-${index + 1}`} style={styles.innerScrollLine}>
+                {line}
+              </Text>
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
     </View>
   )
 }
 
 export default function App() {
-  const [mode, setMode] = useState('default')
-  const demoCardHeight = Platform.OS === 'ios' ? 500 : 250
-  const activeMode = Platform.OS === 'ios' ? mode : 'default'
-  const activeCards = activeMode === 'stress' ? STRESS_CARDS : EXPO_CARDS
-  const activePeek = activeMode === 'stress' ? 46 : 58
-  const activeMinPeek = activeMode === 'stress' ? 4 : 10
+  const normalCardHeight = Platform.OS === 'ios' ? 500 : 280
+  const stressCardHeight = Platform.OS === 'ios' ? 500 : 280
 
   return (
-    <View style={styles.root}>
+    <ScrollView style={styles.page} contentContainerStyle={styles.pageContent}>
       <Text style={styles.eyebrow}>Expo Development Target</Text>
       <Text style={styles.title}>OverlappingCardsScroll</Text>
-      {Platform.OS === 'ios' && (
-        <View style={styles.modeSwitch}>
-          <Pressable
-            style={[styles.modeButton, activeMode === 'default' && styles.modeButtonActive]}
-            onPress={() => setMode('default')}
-          >
-            <Text style={[styles.modeButtonText, activeMode === 'default' && styles.modeButtonTextActive]}>
-              Demo
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.modeButton, activeMode === 'stress' && styles.modeButtonActive]}
-            onPress={() => setMode('stress')}
-          >
-            <Text style={[styles.modeButtonText, activeMode === 'stress' && styles.modeButtonTextActive]}>
-              Stress Test
-            </Text>
-          </Pressable>
-        </View>
-      )}
-      {activeMode === 'stress' && (
-        <Text style={styles.modeHint}>iOS stress-test screen with 14 cards.</Text>
-      )}
-      <OverlappingCardsScrollRN cardHeight={demoCardHeight} basePeek={activePeek} minPeek={activeMinPeek}>
-        {activeCards.map((card) => (
-          <ExpoCard key={card.id} {...card} />
-        ))}
-      </OverlappingCardsScrollRN>
-    </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Normal Instance</Text>
+        <Text style={styles.sectionDescription}>Base deck with nested vertical content inside card 2.</Text>
+        <OverlappingCardsScrollRN cardHeight={normalCardHeight} basePeek={58} minPeek={10}>
+          {EXPO_CARDS.map((card) => (
+            <ExpoCard key={card.id} {...card} />
+          ))}
+        </OverlappingCardsScrollRN>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Stress Instance</Text>
+        <Text style={styles.sectionDescription}>Dense 14-card stack for overlap and clipping verification.</Text>
+        <OverlappingCardsScrollRN cardHeight={stressCardHeight} basePeek={46} minPeek={4}>
+          {STRESS_CARDS.map((card) => (
+            <ExpoCard key={card.id} {...card} />
+          ))}
+        </OverlappingCardsScrollRN>
+      </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  root: {
+  page: {
     flex: 1,
     backgroundColor: '#f0e8da',
+  },
+  pageContent: {
     paddingTop: 56,
     paddingHorizontal: 14,
+    paddingBottom: 40,
   },
   eyebrow: {
     color: '#2f4d65',
@@ -132,34 +155,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 14,
   },
-  modeSwitch: {
-    flexDirection: 'row',
-    marginBottom: 10,
+  section: {
+    marginBottom: 26,
   },
-  modeButton: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(27, 52, 78, 0.2)',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    marginRight: 8,
-  },
-  modeButtonActive: {
-    backgroundColor: '#173047',
-    borderColor: '#173047',
-  },
-  modeButtonText: {
-    color: '#284a62',
-    fontSize: 14,
+  sectionTitle: {
+    color: '#173047',
+    fontSize: 20,
+    lineHeight: 24,
     fontWeight: '700',
+    marginBottom: 4,
   },
-  modeButtonTextActive: {
-    color: '#f4f8ff',
-  },
-  modeHint: {
+  sectionDescription: {
     color: '#315570',
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -217,5 +226,24 @@ const styles = StyleSheet.create({
     color: '#2f4d65',
     fontSize: 16,
     lineHeight: 23,
+    marginBottom: 8,
+  },
+  innerScrollFrame: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(30, 67, 99, 0.2)',
+    backgroundColor: '#f5f9ff',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    height: 190,
+  },
+  innerScrollContent: {
+    paddingBottom: 8,
+  },
+  innerScrollLine: {
+    color: '#2f4d65',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 6,
   },
 })
