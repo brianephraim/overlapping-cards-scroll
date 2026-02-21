@@ -154,6 +154,33 @@
   font-weight: 700;
 }
 
+.card-counter {
+  appearance: none;
+  align-self: flex-start;
+  margin: 0;
+  border: 1px solid rgba(30, 67, 99, 0.25);
+  border-radius: 999px;
+  background: #f3f8ff;
+  color: #1f4666;
+  font-size: 0.78rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.34rem 0.6rem;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.card-counter:hover {
+  transform: translateY(-1px);
+  background: #e8f2ff;
+  border-color: rgba(20, 72, 118, 0.35);
+}
+
+.card-counter:active {
+  transform: translateY(0);
+}
+
 .content-card-header {
   display: flex;
   justify-content: space-between;

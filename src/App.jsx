@@ -109,9 +109,14 @@ const parseHashPage = () => {
 }
 
 function BasicCard({ tag, title, body, accent }) {
+  const [clickCount, setClickCount] = useState(0)
+
   return (
     <article className="demo-card basic-card" style={{ '--card-accent': accent }}>
       <p className="card-tag">{tag}</p>
+      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+        Clicks: {clickCount}
+      </button>
       <h3>{title}</h3>
       <p>{body}</p>
     </article>
@@ -119,12 +124,17 @@ function BasicCard({ tag, title, body, accent }) {
 }
 
 function ContentCard({ label, title, score, bullets, tone }) {
+  const [clickCount, setClickCount] = useState(0)
+
   return (
     <article className="demo-card content-card" style={{ '--card-accent': tone }}>
       <header className="content-card-header">
         <span>{label}</span>
         <strong>{score}</strong>
       </header>
+      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+        Clicks: {clickCount}
+      </button>
       <h3>{title}</h3>
       <ul>
         {bullets.map((bullet) => (
@@ -136,6 +146,7 @@ function ContentCard({ label, title, score, bullets, tone }) {
 }
 
 function StressCard({ index }) {
+  const [clickCount, setClickCount] = useState(0)
   const hue = (index * 25) % 360
   return (
     <article
@@ -143,6 +154,9 @@ function StressCard({ index }) {
       style={{ '--stress-tone': `hsl(${hue} 65% 45%)` }}
     >
       <p className="card-tag">Card {String(index + 1).padStart(2, '0')}</p>
+      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+        Clicks: {clickCount}
+      </button>
       <h3>Deck Position #{index + 1}</h3>
       <p>Edge visibility remains maintained while this card joins the active position.</p>
     </article>

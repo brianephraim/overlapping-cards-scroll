@@ -15,15 +15,16 @@
   z-index: 2;
   width: 100%;
   min-width: 0;
+  pointer-events: none;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   background: transparent;
 }
 
 .ocs-scroll-region::-webkit-scrollbar {
-  height: 10px;
+  display: none;
 }
 
 .ocs-scroll-region::-webkit-scrollbar-thumb {

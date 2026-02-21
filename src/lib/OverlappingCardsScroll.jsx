@@ -20,6 +20,7 @@ export function OverlappingCardsScroll({
 
   const containerRef = useRef(null)
   const scrollRef = useRef(null)
+  const touchStateRef = useRef(null)
 
   const [viewportWidth, setViewportWidth] = useState(1)
   const [scrollLeft, setScrollLeft] = useState(0)
@@ -103,6 +104,81 @@ export function OverlappingCardsScroll({
   const activeIndex = Math.floor(progress)
   const transitionProgress = progress - activeIndex
 
+  const setControllerScroll = (nextValue) => {
+    const scrollElement = scrollRef.current
+    if (!scrollElement) {
+      return
+    }
+
+    const nextScrollLeft = clamp(nextValue, 0, layout.scrollRange)
+    if (scrollElement.scrollLeft !== nextScrollLeft) {
+      scrollElement.scrollLeft = nextScrollLeft
+    }
+    setScrollLeft(nextScrollLeft)
+  }
+
+  const applyScrollDelta = (delta) => {
+    const scrollElement = scrollRef.current
+    if (!scrollElement) {
+      return
+    }
+
+    setControllerScroll(scrollElement.scrollLeft + delta)
+  }
+
+  const handleWheel = (event) => {
+    if (cardCount < 2) {
+      return
+    }
+
+    const delta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+
+    if (delta === 0) {
+      return
+    }
+
+    event.preventDefault()
+    applyScrollDelta(delta)
+  }
+
+  const handleTouchStart = (event) => {
+    if (cardCount < 2) {
+      return
+    }
+
+    const scrollElement = scrollRef.current
+    const touch = event.touches[0]
+    if (!scrollElement || !touch) {
+      return
+    }
+
+    touchStateRef.current = {
+      startX: touch.clientX,
+      startScrollLeft: scrollElement.scrollLeft,
+    }
+  }
+
+  const handleTouchMove = (event) => {
+    const touchState = touchStateRef.current
+    const touch = event.touches[0]
+    if (!touchState || !touch) {
+      return
+    }
+
+    const delta = touchState.startX - touch.clientX
+    if (Math.abs(delta) < 2) {
+      return
+    }
+
+    event.preventDefault()
+    setControllerScroll(touchState.startScrollLeft + delta)
+  }
+
+  const handleTouchEnd = () => {
+    touchStateRef.current = null
+  }
+
   const containerClassName = className
     ? `overlapping-cards-scroll ${className}`
     : 'overlapping-cards-scroll'
@@ -114,6 +190,11 @@ export function OverlappingCardsScroll({
         style={{
           height: toCssDimension(cardHeight),
         }}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         <div
           className="ocs-track"
