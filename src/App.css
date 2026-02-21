@@ -1,0 +1,231 @@
+:root {
+  --page-bg: #f3efe6;
+  --ink-900: #13263a;
+  --ink-700: #284a62;
+  --ink-300: #85a3bb;
+  --surface: rgba(255, 255, 255, 0.74);
+  --surface-strong: rgba(255, 255, 255, 0.9);
+  --line: rgba(27, 52, 78, 0.17);
+  --shadow: 0 14px 40px rgba(16, 40, 65, 0.19);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  width: min(1120px, 100% - 2.8rem);
+  margin: 2.8rem auto 3.2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+.app-hero {
+  padding: 2rem clamp(1.1rem, 2vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.74), rgba(245, 251, 255, 0.92));
+  box-shadow: var(--shadow);
+  animation: rise-in 520ms ease-out;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-700);
+  font-weight: 600;
+}
+
+.app-hero h1 {
+  margin: 0.45rem 0 0;
+  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+  color: var(--ink-900);
+}
+
+.app-hero p {
+  margin: 0.75rem 0 0;
+  color: var(--ink-700);
+  max-width: 64ch;
+}
+
+.demo-nav {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.demo-nav button {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-700);
+  padding: 0.48rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.demo-nav button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(14, 58, 87, 0.35);
+}
+
+.demo-nav button.is-active {
+  background: #173047;
+  color: #f4f8ff;
+  border-color: #173047;
+}
+
+.demo-page,
+.api-notes {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.demo-page {
+  animation: stage-in 300ms ease-out;
+}
+
+.demo-page-header h2,
+.api-notes h2 {
+  margin: 0;
+  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  color: var(--ink-900);
+}
+
+.demo-page-header p {
+  margin: 0.5rem 0 1rem;
+  color: var(--ink-700);
+}
+
+.demo-card {
+  border-radius: 16px;
+  border: 1px solid rgba(17, 43, 69, 0.13);
+  background: #ffffff;
+  color: #173047;
+  padding: 1rem;
+  box-shadow: 0 16px 30px rgba(22, 45, 68, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  overflow: hidden;
+}
+
+.demo-card h3 {
+  margin: 0;
+  font-size: clamp(1.08rem, 2vw, 1.3rem);
+  line-height: 1.2;
+}
+
+.demo-card p {
+  margin: 0;
+  color: #2f4d65;
+  line-height: 1.42;
+}
+
+.demo-card::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--card-accent, #19476f);
+}
+
+.card-tag {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4a6b84;
+  font-weight: 700;
+}
+
+.content-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: #315570;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.content-card ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: #315570;
+}
+
+.content-card li {
+  line-height: 1.3;
+}
+
+.stress-card {
+  --card-accent: var(--stress-tone);
+  background: linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+}
+
+.api-notes pre {
+  margin: 0.8rem 0 0;
+  padding: 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(18, 54, 84, 0.12);
+  background: #f6f9fc;
+  overflow-x: auto;
+}
+
+.api-notes code {
+  font-size: 0.88rem;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(1120px, 100% - 1.2rem);
+    margin-top: 1rem;
+    margin-bottom: 1.3rem;
+  }
+
+  .demo-card {
+    padding: 0.8rem;
+  }
+}

@@ -1,0 +1,41 @@
+.overlapping-cards-scroll {
+  width: 100%;
+  min-width: 0;
+}
+
+.ocs-scroll-region {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.4rem;
+}
+
+.ocs-scroll-region::-webkit-scrollbar {
+  height: 10px;
+}
+
+.ocs-scroll-region::-webkit-scrollbar-thumb {
+  background: rgba(28, 45, 76, 0.45);
+  border-radius: 999px;
+}
+
+.ocs-track {
+  position: relative;
+  min-height: 1px;
+}
+
+.ocs-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  will-change: transform;
+}
+
+.ocs-card > * {
+  width: 100%;
+  height: 100%;
+}
