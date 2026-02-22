@@ -7,7 +7,7 @@ import {
 export function OverlappingCardsScrollRNFocusTrigger({
   children = 'Make principal',
   className = '',
-  onPress,
+  onPress = undefined,
   ...buttonProps
 }) {
   const handleClick = (event) => {
@@ -27,13 +27,14 @@ export function OverlappingCardsScrollRNFocusTrigger({
 
 export function OverlappingCardsScrollRN({
   children,
-  style,
+  style = undefined,
   cardHeight = 300,
-  cardWidth,
+  cardWidth = undefined,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
   maxPeek = 84,
+  showsHorizontalScrollIndicator = true,
   showPageDots = false,
   pageDotsPosition = 'below',
   pageDotsOffset = 10,
@@ -42,6 +43,8 @@ export function OverlappingCardsScrollRN({
   snapReleaseDelay = 800,
   focusTransitionDuration = 420,
 }) {
+  void showsHorizontalScrollIndicator
+
   return (
     <View style={[styles.root, style]}>
       <OverlappingCardsScroll

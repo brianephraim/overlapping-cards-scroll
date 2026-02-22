@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import {
   OverlappingCardsScrollRN,
   OverlappingCardsScrollRNFocusTrigger,
-} from './OverlappingCardsScrollRN'
+} from './OverlappingCardsScrollRN.web'
 
 const RN_DEMO_CARDS = [
   {

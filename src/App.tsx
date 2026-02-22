@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { OverlappingCardsScroll, OverlappingCardsScrollFocusTrigger } from './lib'
 import { RNWebDemo } from './rn/RNWebDemo'
 import './App.css'
@@ -119,7 +120,7 @@ function BasicCard({ tag, title, body, accent }) {
   const [clickCount, setClickCount] = useState(0)
 
   return (
-    <article className="demo-card basic-card" style={{ '--card-accent': accent }}>
+    <article className="demo-card basic-card" style={{ '--card-accent': accent } as CSSProperties}>
       <p className="card-tag">{tag}</p>
       <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
         Clicks: {clickCount}
@@ -137,7 +138,7 @@ function ContentCard({ label, title, score, bullets, tone }) {
   const [clickCount, setClickCount] = useState(0)
 
   return (
-    <article className="demo-card content-card" style={{ '--card-accent': tone }}>
+    <article className="demo-card content-card" style={{ '--card-accent': tone } as CSSProperties}>
       <header className="content-card-header">
         <span>{label}</span>
         <strong>{score}</strong>
@@ -164,7 +165,7 @@ function StressCard({ index }) {
   return (
     <article
       className="demo-card stress-card"
-      style={{ '--stress-tone': `hsl(${hue} 65% 45%)` }}
+      style={{ '--stress-tone': `hsl(${hue} 65% 45%)` } as CSSProperties}
     >
       <p className="card-tag">Card {String(index + 1).padStart(2, '0')}</p>
       <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>

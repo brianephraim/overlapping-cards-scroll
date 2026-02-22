@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import type { ReactElement } from 'react'
 import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
@@ -45,7 +46,7 @@ function useOverlappingCardsScrollRNCardControl() {
 
   const canFocus = controller !== null && cardIndex !== null
   const focusCard = useCallback(
-    (options) => {
+    (options: { animated?: boolean; transitionMode?: string; duration?: number } = {}) => {
       if (!canFocus) {
         return
       }
@@ -63,10 +64,10 @@ function useOverlappingCardsScrollRNCardControl() {
 
 export function OverlappingCardsScrollRNFocusTrigger({
   children = 'Make principal',
-  style,
-  textStyle,
+  style = undefined,
+  textStyle = undefined,
   transitionMode = 'swoop',
-  onPress,
+  onPress = undefined,
   ...pressableProps
 }) {
   const { canFocus, focusCard } = useOverlappingCardsScrollRNCardControl()
@@ -113,9 +114,9 @@ const resolveCardWidth = (cardWidth, viewportWidth, fallbackRatio) => {
 
 export function OverlappingCardsScrollRN({
   children,
-  style,
+  style = undefined,
   cardHeight = 300,
-  cardWidth,
+  cardWidth = undefined,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
@@ -127,7 +128,7 @@ export function OverlappingCardsScrollRN({
   pageDotsOffset = 10,
   focusTransitionDuration = 420,
 }) {
-  const cards = useMemo(() => Children.toArray(children), [children])
+  const cards = useMemo(() => Children.toArray(children) as ReactElement[], [children])
   const cardCount = cards.length
 
   const scrollRef = useRef(null)
@@ -227,7 +228,10 @@ export function OverlappingCardsScrollRN({
   )
 
   const focusCard = useCallback(
-    (targetIndex, options = {}) => {
+    (
+      targetIndex: number,
+      options: { animated?: boolean; transitionMode?: string; duration?: number } = {},
+    ) => {
       const scrollElement = scrollRef.current
       if (!scrollElement || cardCount === 0) {
         return

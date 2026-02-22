@@ -3,7 +3,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import {
   OverlappingCardsScrollRN,
   OverlappingCardsScrollRNFocusTrigger,
-} from './src/rn/OverlappingCardsScrollRN'
+} from './src/rn/OverlappingCardsScrollRN.native'
 
 const LONG_SCROLL_LINES = [
   'Line 01: Long-form content inside this card should scroll vertically.',
@@ -112,7 +112,7 @@ const IOS_WIDTH_EXAMPLES = [
   { label: '250', value: 250 },
 ]
 
-function ExpoCard({ tag, title, body, color, scrollLines }) {
+function ExpoCard({ tag, title, body, color, scrollLines = undefined }) {
   const [clickCount, setClickCount] = useState(0)
 
   return (

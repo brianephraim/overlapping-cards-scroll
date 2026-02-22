@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import type { ReactElement } from 'react'
 import './OverlappingCardsScroll.css'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
@@ -44,7 +45,7 @@ function useOverlappingCardsScrollCardControl() {
 
   const canFocus = controller !== null && cardIndex !== null
   const focusCard = useCallback(
-    (options) => {
+    (options: { behavior?: string; transitionMode?: string; duration?: number } = {}) => {
       if (!canFocus) {
         return
       }
@@ -65,7 +66,7 @@ export function OverlappingCardsScrollFocusTrigger({
   className = '',
   behavior = 'smooth',
   transitionMode = 'swoop',
-  onClick,
+  onClick = undefined,
   ...buttonProps
 }) {
   const { canFocus, focusCard } = useOverlappingCardsScrollCardControl()
@@ -116,7 +117,7 @@ export function OverlappingCardsScroll({
   children,
   className = '',
   cardHeight = 300,
-  cardWidth,
+  cardWidth = undefined,
   cardWidthRatio = 1 / 3,
   basePeek = 64,
   minPeek = 10,
@@ -131,7 +132,7 @@ export function OverlappingCardsScroll({
   focusTransitionDuration = 420,
   ariaLabel = 'Overlapping cards scroll',
 }) {
-  const cards = useMemo(() => Children.toArray(children), [children])
+  const cards = useMemo(() => Children.toArray(children) as ReactElement[], [children])
   const cardCount = cards.length
 
   const containerRef = useRef(null)
@@ -265,7 +266,7 @@ export function OverlappingCardsScroll({
   const transitionProgress = progress - activeIndex
 
   const snapToNearestCard = useCallback(
-    (options = {}) => {
+    (options: { behavior?: string } = {}) => {
       if (!snapToCardOnRelease || cardCount < 2) {
         return
       }
@@ -295,7 +296,7 @@ export function OverlappingCardsScroll({
       if (typeof scrollElement.scrollTo === 'function') {
         scrollElement.scrollTo({
           left: targetScrollLeft,
-          behavior,
+          behavior: behavior as ScrollBehavior,
         })
       } else {
         scrollElement.scrollLeft = targetScrollLeft
@@ -356,7 +357,10 @@ export function OverlappingCardsScroll({
   }, [cardCount, clearSnapTimeout, snapToCardOnRelease, snapToNearestCard])
 
   const focusCard = useCallback(
-    (targetIndex, options = {}) => {
+    (
+      targetIndex: number,
+      options: { behavior?: string; transitionMode?: string; duration?: number } = {},
+    ) => {
       const scrollElement = scrollRef.current
       if (!scrollElement || cardCount === 0) {
         return
@@ -396,7 +400,7 @@ export function OverlappingCardsScroll({
       if (typeof scrollElement.scrollTo === 'function') {
         scrollElement.scrollTo({
           left: nextScrollLeft,
-          behavior: options.behavior ?? 'smooth',
+          behavior: (options.behavior ?? 'smooth') as ScrollBehavior,
         })
       } else {
         scrollElement.scrollLeft = nextScrollLeft
