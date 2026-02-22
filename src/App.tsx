@@ -191,13 +191,15 @@ function DemoStage({ pageId }) {
         cardHeight={320}
         basePeek={68}
         showPageDots
-        pageDotsPosition="above"
-        pageDotsOffset={10}
-      >
-        {CONTENT_CARD_DATA.map((card) => (
-          <ContentCard key={card.id} {...card} />
-        ))}
-      </OverlappingCardsScroll>
+        pageDotsPosition="below"
+        showTabs
+        tabsPosition="above"
+        items={CONTENT_CARD_DATA.map((card) => ({
+          name: card.title,
+          id: card.id,
+          jsx: <ContentCard {...card} />,
+        }))}
+      />
     )
   }
 
@@ -224,12 +226,14 @@ function DemoStage({ pageId }) {
       basePeek={64}
       showPageDots
       pageDotsPosition="overlay"
-      pageDotsOffset={10}
-    >
-      {BASIC_CARD_DATA.map((card) => (
-        <BasicCard key={card.id} {...card} />
-      ))}
-    </OverlappingCardsScroll>
+      showTabs
+      tabsPosition="above"
+      items={BASIC_CARD_DATA.map((card) => ({
+        name: card.title,
+        id: card.id,
+        jsx: <BasicCard {...card} />,
+      }))}
+    />
   )
 }
 
@@ -291,11 +295,23 @@ function App() {
         <pre>
           <code>{`import { OverlappingCardsScroll } from './lib'
 
+// Children pattern (no tabs)
 <OverlappingCardsScroll cardHeight={280}>
-  {cards.map((card) => (
-    <Card key={card.id} {...card} />
+  {cards.map((c) => (
+    <Card key={c.id} {...c} />
   ))}
-</OverlappingCardsScroll>`}</code>
+</OverlappingCardsScroll>
+
+// Items pattern (enables tabs)
+<OverlappingCardsScroll
+  cardHeight={280}
+  showTabs
+  items={cards.map((c) => ({
+    name: c.title,
+    id: c.id,
+    jsx: <Card {...c} />,
+  }))}
+/>`}</code>
         </pre>
       </section>
     </main>
