@@ -135,6 +135,7 @@ export function OverlappingCardsScrollRN({
   const scrollXValueRef = useRef(0)
   const focusTransitionProgress = useRef(new Animated.Value(1)).current
   const focusTransitionAnimationRef = useRef(null)
+  const focusTransitionIdRef = useRef(0)
 
   const [viewportWidth, setViewportWidth] = useState(1)
   const [focusTransition, setFocusTransition] = useState(null)
@@ -180,6 +181,7 @@ export function OverlappingCardsScrollRN({
   }, [focusTransitionProgress])
 
   const cancelFocusTransition = useCallback(() => {
+    focusTransitionIdRef.current += 1
     stopFocusTransitionAnimation()
     setFocusTransition(null)
   }, [stopFocusTransitionAnimation])
@@ -247,20 +249,21 @@ export function OverlappingCardsScrollRN({
           : focusTransitionDuration
 
         stopFocusTransitionAnimation()
+        const transitionId = focusTransitionIdRef.current + 1
+        focusTransitionIdRef.current = transitionId
         focusTransitionProgress.setValue(0)
         setFocusTransition({ fromProgress, toProgress })
-
-        scrollElement.scrollTo({
-          x: nextScrollLeft,
-          y: 0,
-          animated: false,
-        })
-        scrollX.setValue(nextScrollLeft)
-        scrollXValueRef.current = nextScrollLeft
 
         if (duration <= 0 || Math.abs(toProgress - fromProgress) < 0.001) {
           setFocusTransition(null)
           focusTransitionProgress.setValue(1)
+          scrollElement.scrollTo({
+            x: nextScrollLeft,
+            y: 0,
+            animated: false,
+          })
+          scrollX.setValue(nextScrollLeft)
+          scrollXValueRef.current = nextScrollLeft
           return
         }
 
@@ -271,8 +274,18 @@ export function OverlappingCardsScrollRN({
           useNativeDriver: true,
         })
 
-        focusTransitionAnimationRef.current.start(() => {
+        focusTransitionAnimationRef.current.start(({ finished }) => {
+          if (!finished || focusTransitionIdRef.current !== transitionId) {
+            return
+          }
           focusTransitionAnimationRef.current = null
+          scrollElement.scrollTo({
+            x: nextScrollLeft,
+            y: 0,
+            animated: false,
+          })
+          scrollX.setValue(nextScrollLeft)
+          scrollXValueRef.current = nextScrollLeft
           focusTransitionProgress.setValue(1)
           setFocusTransition(null)
         })
@@ -314,6 +327,20 @@ export function OverlappingCardsScrollRN({
     snapToCardOnRelease && Platform.OS === 'ios' && cardCount > 1 && layout.stepDistance > 1
   const resolvedPageDotsPosition = normalizePageDotsPosition(pageDotsPosition)
   const showNavigationDots = showPageDots && cardCount > 1
+  const dotScrollX = useMemo(() => {
+    if (!focusTransition) {
+      return scrollX
+    }
+
+    const fromX = focusTransition.fromProgress * layout.stepDistance
+    const toX = focusTransition.toProgress * layout.stepDistance
+
+    return focusTransitionProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [fromX, toX],
+      extrapolate: 'clamp',
+    })
+  }, [focusTransition, focusTransitionProgress, layout.stepDistance, scrollX])
 
   const renderPageDots = (placement) => {
     if (!showNavigationDots || resolvedPageDotsPosition !== placement) {
@@ -338,12 +365,12 @@ export function OverlappingCardsScrollRN({
             index * layout.stepDistance,
             (index + 1) * layout.stepDistance,
           ]
-          const opacity = scrollX.interpolate({
+          const opacity = dotScrollX.interpolate({
             inputRange,
             outputRange: [0.25, 1, 0.25],
             extrapolate: 'clamp',
           })
-          const scale = scrollX.interpolate({
+          const scale = dotScrollX.interpolate({
             inputRange,
             outputRange: [0.9, 1.12, 0.9],
             extrapolate: 'clamp',
