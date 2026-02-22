@@ -1,0 +1,12 @@
+{
+  "name": "overlapping-cards-scroll-expo-demo",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ../node_modules/expo/bin/cli start",
+    "ios": "node ../node_modules/expo/bin/cli start --ios",
+    "android": "node ../node_modules/expo/bin/cli start --android",
+    "web": "node ../node_modules/expo/bin/cli start --web"
+  }
+}

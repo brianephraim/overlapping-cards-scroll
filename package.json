@@ -67,7 +67,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:expo": "expo start",
+    "dev:expo": "node ./node_modules/expo/bin/cli start ./expo-demo",
     "build": "npm run build:package",
     "build:package": "node ./scripts/build-package.mjs && npm run build:types",
     "build:types": "tsc -p tsconfig.package.json",

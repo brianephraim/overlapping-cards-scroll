@@ -114,6 +114,14 @@ Expo development:
 npm run dev:expo
 ```
 
+The Expo app shell lives in `expo-demo/` and imports the demo screen from the package root via `../App`.
+You can also run it directly with:
+
+```bash
+cd expo-demo
+npm run dev
+```
+
 Build package artifacts:
 
 ```bash
