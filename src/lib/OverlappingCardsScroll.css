@@ -1,12 +1,18 @@
 .overlapping-cards-scroll {
   width: 100%;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .ocs-stage-frame {
   width: 100%;
   min-width: 0;
   position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .ocs-stage {
@@ -15,6 +21,7 @@
   position: relative;
   overflow: hidden;
   overscroll-behavior-x: none;
+  height: 100%;
 }
 
 .ocs-scroll-region {
@@ -42,20 +49,19 @@
 }
 
 .ocs-track {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   z-index: 1;
 }
 
 .ocs-scroll-spacer {
-  min-height: 1px;
+  height: 1px;
 }
 
 .ocs-card {
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
   box-sizing: border-box;
   will-change: transform;
@@ -73,6 +79,7 @@
 
 .ocs-page-dots {
   display: flex;
+  flex-shrink: 0;
   width: 100%;
   justify-content: center;
   align-items: center;

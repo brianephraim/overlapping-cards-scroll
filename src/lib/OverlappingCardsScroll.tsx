@@ -589,7 +589,7 @@ export function OverlappingCardsScroll({
             className="ocs-stage"
             ref={stageRef}
             style={{
-              height: toCssDimension(cardHeight),
+              minHeight: toCssDimension(cardHeight),
             }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -598,9 +598,6 @@ export function OverlappingCardsScroll({
           >
             <div
               className="ocs-track"
-              style={{
-                height: toCssDimension(cardHeight),
-              }}
             >
               {cards.map((card, index) => {
                 const cardX = resolveCardX(index, activeIndex, transitionProgress, layout)
@@ -617,7 +614,6 @@ export function OverlappingCardsScroll({
                     }
                     style={{
                       width: `${layout.cardWidth}px`,
-                      height: toCssDimension(cardHeight),
                       transform: `translate3d(${cardX}px, 0, 0)`,
                       transitionDuration: focusTransition ? `${focusTransition.duration}ms` : undefined,
                       ...cardContainerStyle,
@@ -635,7 +631,6 @@ export function OverlappingCardsScroll({
                 className="ocs-scroll-spacer"
                 style={{
                   width: `${layout.trackWidth}px`,
-                  height: toCssDimension(cardHeight),
                 }}
               />
             </div>
