@@ -1,16 +1,18 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native-web'
 import {
   OverlappingCardsScroll,
   OverlappingCardsScrollFocusTrigger,
-} from '../lib'
+} from '../lib/OverlappingCardsScroll'
 
 export function OverlappingCardsScrollRNFocusTrigger({
   children = 'Make principal',
   className = '',
-  onPress = undefined,
+  onPress = undefined as undefined | ((event: unknown) => void),
+  onClick = undefined as undefined | ((event: unknown) => void),
   ...buttonProps
-}) {
-  const handleClick = (event) => {
+}: any) {
+  const handleClick = (event: unknown) => {
+    onClick?.(event)
     onPress?.(event)
   }
 
@@ -28,44 +30,18 @@ export function OverlappingCardsScrollRNFocusTrigger({
 export function OverlappingCardsScrollRN({
   children,
   style = undefined,
-  cardHeight = 300,
-  cardWidth = undefined,
-  cardWidthRatio = 1 / 3,
-  basePeek = 64,
-  minPeek = 10,
-  maxPeek = 84,
   showsHorizontalScrollIndicator = true,
   snapDecelerationRate = 'normal',
   snapDisableIntervalMomentum = false,
-  showPageDots = false,
-  pageDotsPosition = 'below' as const,
-  pageDotsOffset = 10,
-  pageDotsBehavior = 'smooth' as const,
-  snapToCardOnRelease = true,
-  snapReleaseDelay = 800,
-  focusTransitionDuration = 420,
-}) {
+  ...overlappingCardsScrollProps
+}: any) {
   void showsHorizontalScrollIndicator
   void snapDecelerationRate
   void snapDisableIntervalMomentum
 
   return (
     <View style={[styles.root, style]}>
-      <OverlappingCardsScroll
-        cardHeight={cardHeight}
-        cardWidth={cardWidth}
-        cardWidthRatio={cardWidthRatio}
-        basePeek={basePeek}
-        minPeek={minPeek}
-        maxPeek={maxPeek}
-        showPageDots={showPageDots}
-        pageDotsPosition={pageDotsPosition}
-        pageDotsOffset={pageDotsOffset}
-        pageDotsBehavior={pageDotsBehavior}
-        snapToCardOnRelease={snapToCardOnRelease}
-        snapReleaseDelay={snapReleaseDelay}
-        focusTransitionDuration={focusTransitionDuration}
-      >
+      <OverlappingCardsScroll {...overlappingCardsScrollProps}>
         {children}
       </OverlappingCardsScroll>
     </View>
