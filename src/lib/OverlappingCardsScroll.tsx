@@ -193,11 +193,13 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   const hasItems = 'items' in props && Array.isArray(props.items)
   const hasChildren = 'children' in props && props.children != null
 
-  if (hasItems && hasChildren) {
-    console.warn(
-      'OverlappingCardsScroll: Both `items` and `children` were provided. `items` takes precedence.'
-    )
-  }
+  useEffect(() => {
+    if (hasItems && hasChildren) {
+      console.warn(
+        'OverlappingCardsScroll: Both `items` and `children` were provided. `items` takes precedence.'
+      )
+    }
+  }, [hasItems, hasChildren])
 
   const cards = useMemo(() => {
     if (hasItems) {
@@ -630,11 +632,13 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   const resolvedTabsPosition = normalizeTabsPosition(tabsPosition)
   const showNavigationTabs = showTabs && cardCount > 1 && cardNames !== null
 
-  if (showTabs && cardNames === null) {
-    console.warn(
-      'OverlappingCardsScroll: `showTabs` requires the `items` prop to provide card names. Tabs will not render.'
-    )
-  }
+  useEffect(() => {
+    if (showTabs && cardNames === null) {
+      console.warn(
+        'OverlappingCardsScroll: `showTabs` requires the `items` prop to provide card names. Tabs will not render.'
+      )
+    }
+  }, [showTabs, cardNames])
 
   return (
     <OverlappingCardsScrollControllerContext.Provider value={controllerContextValue}>
