@@ -9,7 +9,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ComponentType, CSSProperties, ReactElement, ReactNode } from 'react'
+import type React from 'react'
+import type { ComponentProps, ComponentType, CSSProperties, ReactElement, ReactNode } from 'react'
 import './OverlappingCardsScroll.css'
 
 export interface CardItem {
@@ -175,6 +176,15 @@ function useOverlappingCardsScrollCardControl() {
   }
 }
 
+export interface OverlappingCardsScrollFocusTriggerProps
+  extends Omit<ComponentProps<'button'>, 'onClick'> {
+  children?: ReactNode
+  className?: string
+  behavior?: 'smooth' | 'auto'
+  transitionMode?: 'swoop' | 'instant'
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+}
+
 export function OverlappingCardsScrollFocusTrigger({
   children = 'Make principal',
   className = '',
@@ -182,7 +192,7 @@ export function OverlappingCardsScrollFocusTrigger({
   transitionMode = 'swoop',
   onClick = undefined,
   ...buttonProps
-}) {
+}: OverlappingCardsScrollFocusTriggerProps) {
   const { canFocus, focusCard } = useOverlappingCardsScrollCardControl()
 
   const handleClick = (event) => {
