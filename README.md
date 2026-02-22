@@ -1,92 +1,71 @@
-# Overlapping Cards Scroll
+# overlapping-cards-scroll
 
-React + Vite workspace for building a reusable `OverlappingCardsScroll` component and testing it with multiple demo pages.
+Reusable overlapping-cards scroll component for React, React Native, and React Native Web.
 
-## Run
-
-```bash
-npm install
-npm run dev
-```
-
-Then open the local Vite URL and switch between:
-
-- `#basic` foundation demo
-- `#content` rich-content demo
-- `#stress` many-card stress demo
-- `#rnweb` React Native Web demo
-
-## Expo Dev
+## Install
 
 ```bash
-npm run dev:expo
+npm install overlapping-cards-scroll
 ```
 
-This launches the Expo dev server.
+Peer dependencies:
 
-## Build
+- `react` `^18 || ^19`
+- `react-dom` `^18 || ^19` (optional)
+- `react-native` `>=0.73` (optional)
+- `react-native-web` `>=0.19` (optional)
 
-```bash
-npm run build
+## Web Usage
+
+```tsx
+import 'overlapping-cards-scroll/styles.css'
+import {
+  OverlappingCardsScroll,
+  OverlappingCardsScrollFocusTrigger,
+} from 'overlapping-cards-scroll'
+
+export function Example({ cards }) {
+  return (
+    <OverlappingCardsScroll cardHeight={280} showPageDots pageDotsPosition="below">
+      {cards.map((card) => (
+        <article key={card.id}>
+          <h3>{card.title}</h3>
+          <OverlappingCardsScrollFocusTrigger>
+            Make principal
+          </OverlappingCardsScrollFocusTrigger>
+        </article>
+      ))}
+    </OverlappingCardsScroll>
+  )
+}
 ```
 
-## Type Check
+## React Native Usage
 
-```bash
-npm run typecheck
+```tsx
+import {
+  OverlappingCardsScrollRN,
+  OverlappingCardsScrollRNFocusTrigger,
+} from 'overlapping-cards-scroll/react-native'
 ```
 
-## Component
+`/react-native` resolves to:
 
-`OverlappingCardsScroll` lives in `src/lib/OverlappingCardsScroll.tsx` and is exported from `src/lib/index.ts`.
+- native build for React Native runtimes
+- web adapter build for non-native runtimes
 
-React Native versions live in:
-- `src/rn/OverlappingCardsScrollRN.native.tsx`
-- `src/rn/OverlappingCardsScrollRN.web.tsx`
+You can also target explicit builds:
 
-You can nest a focus trigger inside any card to bring that card into principal view:
+- `overlapping-cards-scroll/react-native/native`
+- `overlapping-cards-scroll/react-native/web`
 
-```jsx
-<OverlappingCardsScrollFocusTrigger>
-  Make principal
-</OverlappingCardsScrollFocusTrigger>
+For web adapter usage, import package styles:
+
+```tsx
+import 'overlapping-cards-scroll/styles.css'
 ```
 
-For RN/RN-web, use `OverlappingCardsScrollRNFocusTrigger`.
-
-You can also enable clickable page dots:
-
-```jsx
-<OverlappingCardsScroll
-  showPageDots
-  pageDotsPosition="overlay"
-  pageDotsOffset={10}
->
-  {cards}
-</OverlappingCardsScroll>
-```
-
-### Behavior
-
-- Horizontal scrolling drives card transitions.
-- Each card width is `1/3` of the scroll container by default.
-- Lower index cards stay visually below higher index cards.
-- Cards fan out so each card keeps a visible leading edge.
-- As you scroll, the next card slides left to become the primary visible card.
-
-### Example
-
-```jsx
-import { OverlappingCardsScroll } from './lib'
-
-<OverlappingCardsScroll cardHeight={280}>
-  {cards.map((card) => (
-    <Card key={card.id} {...card} />
-  ))}
-</OverlappingCardsScroll>
-```
-
-### Props
+## Props
 
 - `children`: card nodes
 - `cardHeight` (`number | string`, default `300`)
@@ -106,3 +85,35 @@ import { OverlappingCardsScroll } from './lib'
 - `focusTransitionDuration` (`number`, default `420`) duration for click-triggered "single swoop" focus transitions
 - `className` (`string`)
 - `ariaLabel` (`string`)
+
+## Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+Vite demos:
+
+- `#basic` foundation demo
+- `#content` rich-content demo
+- `#stress` many-card stress demo
+- `#rnweb` React Native Web demo
+
+Expo development:
+
+```bash
+npm run dev:expo
+```
+
+Build package artifacts:
+
+```bash
+npm run build
+```
+
+Build demo site:
+
+```bash
+npm run build:demo
+```

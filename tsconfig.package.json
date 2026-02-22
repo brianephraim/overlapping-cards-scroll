@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": false,
+    "outDir": "./dist/types",
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "types": []
+  },
+  "include": [
+    "src/lib/index.ts",
+    "src/lib/OverlappingCardsScroll.tsx",
+    "src/rn/OverlappingCardsScrollRN.native.tsx",
+    "src/rn/OverlappingCardsScrollRN.web.tsx"
+  ]
+}

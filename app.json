@@ -3,6 +3,7 @@
     "name": "Overlapping Cards Scroll",
     "slug": "overlapping-cards-scroll",
     "version": "1.0.0",
+    "entryPoint": "./index.js",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": ["**/*"],

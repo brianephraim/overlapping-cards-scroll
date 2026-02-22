@@ -1,23 +1,98 @@
 {
   "name": "overlapping-cards-scroll",
-  "private": true,
-  "version": "0.0.0",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "Overlapping cards scroll component for React, React Native, and React Native Web.",
+  "license": "MIT",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/lib/index.d.ts",
+  "react-native": "./dist/react-native.js",
+  "style": "./dist/styles.css",
+  "exports": {
+    ".": {
+      "types": "./dist/types/lib/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./react-native": {
+      "types": "./dist/types/rn/OverlappingCardsScrollRN.native.d.ts",
+      "react-native": "./dist/react-native.js",
+      "import": "./dist/react-native-web.js",
+      "require": "./dist/react-native-web.cjs",
+      "default": "./dist/react-native-web.js"
+    },
+    "./react-native/native": {
+      "types": "./dist/types/rn/OverlappingCardsScrollRN.native.d.ts",
+      "import": "./dist/react-native.js",
+      "require": "./dist/react-native.cjs",
+      "default": "./dist/react-native.js"
+    },
+    "./react-native/web": {
+      "types": "./dist/types/rn/OverlappingCardsScrollRN.web.d.ts",
+      "import": "./dist/react-native-web.js",
+      "require": "./dist/react-native-web.cjs",
+      "default": "./dist/react-native-web.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
+  "keywords": [
+    "react",
+    "react-native",
+    "react-native-web",
+    "cards",
+    "carousel",
+    "scroll"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianephraim/overlapping-cards-scroll.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brianephraim/overlapping-cards-scroll/issues"
+  },
+  "homepage": "https://github.com/brianephraim/overlapping-cards-scroll#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite",
     "dev:expo": "expo start",
-    "build": "vite build",
+    "build": "npm run build:package",
+    "build:package": "node ./scripts/build-package.mjs && npm run build:types",
+    "build:types": "tsc -p tsconfig.package.json",
+    "build:demo": "vite build --outDir web-build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --outDir web-build",
+    "prepack": "npm run build:package"
   },
-  "dependencies": {
-    "expo": "^54.0.33",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-native": "0.81.5",
-    "react-native-web": "^0.21.2"
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-native": ">=0.73.0",
+    "react-native-web": ">=0.19.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    },
+    "react-native-web": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -29,7 +104,13 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "esbuild": "^0.25.0",
+    "expo": "^54.0.33",
     "globals": "^16.5.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-web": "^0.21.2",
     "typescript": "~5.9.2",
     "vite": "^7.3.1"
   }
