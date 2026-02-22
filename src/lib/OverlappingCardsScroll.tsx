@@ -1,5 +1,6 @@
 import {
   Children,
+  Fragment,
   createContext,
   useCallback,
   useContext,
@@ -8,8 +9,52 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import './OverlappingCardsScroll.css'
+
+export interface CardItem {
+  name: string
+  id: string | number
+  jsx: ReactElement
+}
+
+type SharedProps = {
+  className?: string
+  cardHeight?: number | string
+  cardWidth?: number | string
+  cardWidthRatio?: number
+  basePeek?: number
+  minPeek?: number
+  maxPeek?: number
+  showPageDots?: boolean
+  pageDotsPosition?: 'above' | 'below' | 'overlay'
+  pageDotsOffset?: number | string
+  pageDotsBehavior?: 'smooth' | 'auto'
+  pageDotsClassName?: string
+  cardContainerClassName?: string
+  cardContainerStyle?: CSSProperties
+  snapToCardOnRelease?: boolean
+  snapReleaseDelay?: number
+  focusTransitionDuration?: number
+  ariaLabel?: string
+  showTabs?: boolean
+  tabsPosition?: 'above' | 'below'
+  tabsOffset?: number | string
+  tabsBehavior?: 'smooth' | 'auto'
+  tabsClassName?: string
+}
+
+type WithChildren = SharedProps & {
+  children: ReactNode
+  items?: never
+}
+
+type WithItems = SharedProps & {
+  items: CardItem[]
+  children?: never
+}
+
+type OverlappingCardsScrollProps = WithChildren | WithItems
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
@@ -113,28 +158,58 @@ const resolveCardWidth = (cardWidth, viewportWidth, fallbackRatio) => {
   return viewportWidth * fallbackRatio
 }
 
-export function OverlappingCardsScroll({
-  children,
-  className = '',
-  cardHeight = 300,
-  cardWidth = undefined,
-  cardWidthRatio = 1 / 3,
-  basePeek = 64,
-  minPeek = 10,
-  maxPeek = 84,
-  showPageDots = false,
-  pageDotsPosition = 'below',
-  pageDotsOffset = 10,
-  pageDotsBehavior = 'smooth',
-  pageDotsClassName = '',
-  cardContainerClassName = '',
-  cardContainerStyle = {},
-  snapToCardOnRelease = true,
-  snapReleaseDelay = 800,
-  focusTransitionDuration = 420,
-  ariaLabel = 'Overlapping cards scroll',
-}) {
-  const cards = useMemo(() => Children.toArray(children) as ReactElement[], [children])
+export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
+  const {
+    className = '',
+    cardHeight = 300,
+    cardWidth = undefined,
+    cardWidthRatio = 1 / 3,
+    basePeek = 64,
+    minPeek = 10,
+    maxPeek = 84,
+    showPageDots = false,
+    pageDotsPosition = 'below',
+    pageDotsOffset = 10,
+    pageDotsBehavior = 'smooth',
+    pageDotsClassName = '',
+    cardContainerClassName = '',
+    cardContainerStyle = {},
+    snapToCardOnRelease = true,
+    snapReleaseDelay = 800,
+    focusTransitionDuration = 420,
+    ariaLabel = 'Overlapping cards scroll',
+    showTabs = false,
+    tabsPosition = 'above',
+    tabsOffset = 10,
+    tabsBehavior = 'smooth',
+    tabsClassName = '',
+  } = props
+
+  const hasItems = 'items' in props && Array.isArray(props.items)
+  const hasChildren = 'children' in props && props.children != null
+
+  if (hasItems && hasChildren) {
+    console.warn(
+      'OverlappingCardsScroll: Both `items` and `children` were provided. `items` takes precedence.'
+    )
+  }
+
+  const cards = useMemo(() => {
+    if (hasItems) {
+      return props.items.map((item) => (
+        <Fragment key={item.id}>{item.jsx}</Fragment>
+      ))
+    }
+    return Children.toArray(hasChildren ? props.children : null) as ReactElement[]
+  }, [hasItems, hasChildren, hasItems ? props.items : null, hasChildren ? props.children : null])
+
+  const cardNames: string[] | null = useMemo(() => {
+    if (hasItems) {
+      return props.items.map((item) => item.name)
+    }
+    return null
+  }, [hasItems, hasItems ? props.items : null])
+
   const cardCount = cards.length
 
   const containerRef = useRef(null)
