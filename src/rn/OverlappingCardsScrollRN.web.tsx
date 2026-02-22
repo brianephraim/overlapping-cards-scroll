@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react'
-import { StyleSheet, View } from 'react-native-web'
+import { StyleSheet, View } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import {
   OverlappingCardsScroll,
