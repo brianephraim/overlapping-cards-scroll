@@ -123,6 +123,8 @@ export function OverlappingCardsScrollRN({
   maxPeek = 84,
   showsHorizontalScrollIndicator = true,
   snapToCardOnRelease = true,
+  snapDecelerationRate = 'normal',
+  snapDisableIntervalMomentum = false,
   showPageDots = false,
   pageDotsPosition = 'below',
   pageDotsOffset = 10,
@@ -418,8 +420,12 @@ export function OverlappingCardsScrollRN({
             showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
             snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
             snapToAlignment={shouldSnapToCard ? 'start' : undefined}
-            decelerationRate={shouldSnapToCard ? 'fast' : 'normal'}
-            disableIntervalMomentum={shouldSnapToCard}
+            decelerationRate={
+              shouldSnapToCard
+                ? (snapDecelerationRate as number | 'normal' | 'fast')
+                : 'normal'
+            }
+            disableIntervalMomentum={shouldSnapToCard ? snapDisableIntervalMomentum : false}
           >
             <View style={[styles.track, { width: layout.trackWidth, height: cardHeight }]}>
               {cards.map((card, index) => {

@@ -35,6 +35,8 @@ export function OverlappingCardsScrollRN({
   minPeek = 10,
   maxPeek = 84,
   showsHorizontalScrollIndicator = true,
+  snapDecelerationRate = 'normal',
+  snapDisableIntervalMomentum = false,
   showPageDots = false,
   pageDotsPosition = 'below',
   pageDotsOffset = 10,
@@ -44,6 +46,8 @@ export function OverlappingCardsScrollRN({
   focusTransitionDuration = 420,
 }) {
   void showsHorizontalScrollIndicator
+  void snapDecelerationRate
+  void snapDisableIntervalMomentum
 
   return (
     <View style={[styles.root, style]}>
