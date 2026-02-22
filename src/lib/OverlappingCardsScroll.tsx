@@ -9,13 +9,40 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ReactElement, ReactNode, CSSProperties } from 'react'
+import type { ComponentType, CSSProperties, ReactElement, ReactNode } from 'react'
 import './OverlappingCardsScroll.css'
 
 export interface CardItem {
   name: string
   id: string | number
   jsx: ReactElement
+}
+
+export interface OverlappingCardsScrollTabProps {
+  name: string
+  index: number
+  position: 'above' | 'below'
+  isPrincipal: boolean
+  influence: number
+  animate: {
+    opacity: number
+  }
+  className: string
+  style: CSSProperties
+  ariaLabel: string
+  ariaCurrent?: 'page'
+  onClick: () => void
+}
+
+export interface OverlappingCardsScrollTabsContainerProps {
+  children: ReactNode
+  position: 'above' | 'below'
+  className: string
+  style: CSSProperties
+  ariaLabel: string
+  cardNames: string[]
+  activeIndex: number
+  progress: number
 }
 
 type SharedProps = {
@@ -42,6 +69,8 @@ type SharedProps = {
   tabsOffset?: number | string
   tabsBehavior?: 'smooth' | 'auto'
   tabsClassName?: string
+  tabsComponent?: ComponentType<OverlappingCardsScrollTabProps>
+  tabsContainerComponent?: ComponentType<OverlappingCardsScrollTabsContainerProps>
 }
 
 type WithChildren = SharedProps & {
@@ -68,6 +97,41 @@ const TAB_POSITIONS = new Set(['above', 'below'])
 
 const normalizeTabsPosition = (value) =>
   TAB_POSITIONS.has(value) ? value : 'above'
+
+function DefaultTabsContainerComponent({
+  children,
+  className,
+  style,
+  ariaLabel,
+}: OverlappingCardsScrollTabsContainerProps) {
+  return (
+    <nav className={className} style={style} aria-label={ariaLabel}>
+      {children}
+    </nav>
+  )
+}
+
+function DefaultTabsComponent({
+  name,
+  className,
+  style,
+  ariaLabel,
+  ariaCurrent,
+  onClick,
+}: OverlappingCardsScrollTabProps) {
+  return (
+    <button
+      type="button"
+      className={className}
+      aria-label={ariaLabel}
+      aria-current={ariaCurrent}
+      onClick={onClick}
+      style={style}
+    >
+      {name}
+    </button>
+  )
+}
 
 const resolveCardX = (index, principalIndex, transitionProgress, layout) => {
   if (index <= principalIndex) {
@@ -188,6 +252,8 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     tabsOffset = 10,
     tabsBehavior = 'smooth',
     tabsClassName = '',
+    tabsComponent: TabsComponent = DefaultTabsComponent,
+    tabsContainerComponent: TabsContainerComponent = DefaultTabsContainerComponent,
   } = props
 
   const hasItems = 'items' in props && Array.isArray(props.items)
@@ -643,46 +709,69 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     }
   }, [showTabs, cardNames])
 
+  const renderTabs = (position: 'above' | 'below') => {
+    if (!showNavigationTabs || cardNames === null) {
+      return null
+    }
+
+    const containerClassName = tabsClassName
+      ? `ocs-tabs ocs-tabs--${position} ${tabsClassName}`
+      : `ocs-tabs ocs-tabs--${position}`
+
+    const containerStyle =
+      position === 'above'
+        ? { marginBottom: toCssDimension(tabsOffset) }
+        : { marginTop: toCssDimension(tabsOffset) }
+
+    return (
+      <TabsContainerComponent
+        position={position}
+        className={containerClassName}
+        style={containerStyle}
+        ariaLabel="Card tabs"
+        cardNames={cardNames}
+        activeIndex={activeIndex}
+        progress={progress}
+      >
+        {cardNames.map((name, index) => {
+          const influence = clamp(1 - Math.abs(progress - index), 0, 1)
+          const isPrincipal = influence > 0.98
+          const animate = {
+            opacity: 0.45 + influence * 0.55,
+          }
+          const className = isPrincipal ? 'ocs-tab ocs-tab--active' : 'ocs-tab'
+          const style = { opacity: animate.opacity }
+
+          return (
+            <TabsComponent
+              key={`ocs-tab-${position}-${index}`}
+              name={name}
+              index={index}
+              position={position}
+              isPrincipal={isPrincipal}
+              influence={influence}
+              animate={animate}
+              className={className}
+              style={style}
+              ariaLabel={`Go to ${name}`}
+              ariaCurrent={isPrincipal ? 'page' : undefined}
+              onClick={() =>
+                focusCard(index, {
+                  behavior: tabsBehavior,
+                  transitionMode: 'swoop',
+                })
+              }
+            />
+          )
+        })}
+      </TabsContainerComponent>
+    )
+  }
+
   return (
     <OverlappingCardsScrollControllerContext.Provider value={controllerContextValue}>
       <section className={containerClassName} aria-label={ariaLabel} ref={containerRef}>
-        {showNavigationTabs && resolvedTabsPosition === 'above' ? (
-          <nav
-            className={
-              tabsClassName
-                ? `ocs-tabs ocs-tabs--above ${tabsClassName}`
-                : 'ocs-tabs ocs-tabs--above'
-            }
-            style={{ marginBottom: toCssDimension(tabsOffset) }}
-            aria-label="Card tabs"
-          >
-            {cardNames.map((name, index) => {
-              const influence = clamp(1 - Math.abs(progress - index), 0, 1)
-              return (
-                <button
-                  key={`ocs-tab-above-${index}`}
-                  type="button"
-                  className={
-                    influence > 0.98
-                      ? 'ocs-tab ocs-tab--active'
-                      : 'ocs-tab'
-                  }
-                  aria-label={`Go to ${name}`}
-                  aria-current={influence > 0.98 ? 'page' : undefined}
-                  onClick={() =>
-                    focusCard(index, {
-                      behavior: tabsBehavior,
-                      transitionMode: 'swoop',
-                    })
-                  }
-                  style={{ opacity: 0.45 + influence * 0.55 }}
-                >
-                  {name}
-                </button>
-              )
-            })}
-          </nav>
-        ) : null}
+        {resolvedTabsPosition === 'above' ? renderTabs('above') : null}
         {showNavigationDots && resolvedPageDotsPosition === 'above' ? (
           <nav
             className={
@@ -837,43 +926,7 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
             })}
           </nav>
         ) : null}
-        {showNavigationTabs && resolvedTabsPosition === 'below' ? (
-          <nav
-            className={
-              tabsClassName
-                ? `ocs-tabs ocs-tabs--below ${tabsClassName}`
-                : 'ocs-tabs ocs-tabs--below'
-            }
-            style={{ marginTop: toCssDimension(tabsOffset) }}
-            aria-label="Card tabs"
-          >
-            {cardNames.map((name, index) => {
-              const influence = clamp(1 - Math.abs(progress - index), 0, 1)
-              return (
-                <button
-                  key={`ocs-tab-below-${index}`}
-                  type="button"
-                  className={
-                    influence > 0.98
-                      ? 'ocs-tab ocs-tab--active'
-                      : 'ocs-tab'
-                  }
-                  aria-label={`Go to ${name}`}
-                  aria-current={influence > 0.98 ? 'page' : undefined}
-                  onClick={() =>
-                    focusCard(index, {
-                      behavior: tabsBehavior,
-                      transitionMode: 'swoop',
-                    })
-                  }
-                  style={{ opacity: 0.45 + influence * 0.55 }}
-                >
-                  {name}
-                </button>
-              )
-            })}
-          </nav>
-        ) : null}
+        {resolvedTabsPosition === 'below' ? renderTabs('below') : null}
       </section>
     </OverlappingCardsScrollControllerContext.Provider>
   )
