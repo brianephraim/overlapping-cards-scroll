@@ -1,26 +1,44 @@
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps } from 'react'
 import { StyleSheet, View } from 'react-native'
-import type { StyleProp, ViewStyle } from 'react-native'
 import {
   OverlappingCardsScroll,
   OverlappingCardsScrollFocusTrigger,
 } from '../lib/OverlappingCardsScroll'
+import type {
+  OverlappingCardsScrollRNFocusTriggerProps,
+  OverlappingCardsScrollRNProps,
+} from './OverlappingCardsScrollRN.types'
 
-interface OverlappingCardsScrollRNFocusTriggerProps
-  extends Omit<ComponentProps<'button'>, 'onClick'> {
-  children?: ReactNode
-  className?: string
-  onPress?: (event: unknown) => void
-  onClick?: (event: unknown) => void
-}
+export type {
+  OverlappingCardsScrollRNFocusTransitionMode,
+  OverlappingCardsScrollRNFocusTriggerBehavior,
+  OverlappingCardsScrollRNFocusTriggerProps,
+  OverlappingCardsScrollRNItem,
+  OverlappingCardsScrollRNPageDotsPosition,
+  OverlappingCardsScrollRNProps,
+  OverlappingCardsScrollRNSnapDecelerationRate,
+  OverlappingCardsScrollRNTabsContainerProps,
+  OverlappingCardsScrollRNTabProps,
+  OverlappingCardsScrollRNTabsPosition,
+} from './OverlappingCardsScrollRN.types'
 
 export function OverlappingCardsScrollRNFocusTrigger({
   children = 'Make principal',
   className = '',
-  onPress = undefined as undefined | ((event: unknown) => void),
-  onClick = undefined as undefined | ((event: unknown) => void),
+  style = undefined,
+  textStyle = undefined,
+  behavior = 'smooth',
+  transitionMode = 'swoop',
+  disabled = false,
+  accessibilityLabel = undefined,
+  testID = undefined,
+  onPress = undefined,
+  onClick = undefined,
   ...buttonProps
 }: OverlappingCardsScrollRNFocusTriggerProps) {
+  void style
+  void textStyle
+
   const handleClick = (event: unknown) => {
     onClick?.(event)
     onPress?.(event)
@@ -29,6 +47,11 @@ export function OverlappingCardsScrollRNFocusTrigger({
   return (
     <OverlappingCardsScrollFocusTrigger
       className={className}
+      behavior={behavior}
+      transitionMode={transitionMode}
+      disabled={disabled}
+      aria-label={accessibilityLabel}
+      data-testid={testID}
       onClick={handleClick}
       {...buttonProps}
     >
@@ -37,18 +60,7 @@ export function OverlappingCardsScrollRNFocusTrigger({
   )
 }
 
-type OverlappingCardsScrollRNProps = Omit<
-  ComponentProps<typeof OverlappingCardsScroll>,
-  'items'
-> & {
-  style?: StyleProp<ViewStyle>
-  showsHorizontalScrollIndicator?: boolean
-  snapDecelerationRate?: string
-  snapDisableIntervalMomentum?: boolean
-}
-
 export function OverlappingCardsScrollRN({
-  children,
   style = undefined,
   showsHorizontalScrollIndicator = true,
   snapDecelerationRate = 'normal',
@@ -61,9 +73,9 @@ export function OverlappingCardsScrollRN({
 
   return (
     <View style={[styles.root, style]}>
-      <OverlappingCardsScroll {...overlappingCardsScrollProps}>
-        {children}
-      </OverlappingCardsScroll>
+      <OverlappingCardsScroll
+        {...(overlappingCardsScrollProps as ComponentProps<typeof OverlappingCardsScroll>)}
+      />
     </View>
   )
 }

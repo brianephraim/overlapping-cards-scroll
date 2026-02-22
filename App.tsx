@@ -4,6 +4,10 @@ import {
   OverlappingCardsScrollRN,
   OverlappingCardsScrollRNFocusTrigger,
 } from './src/rn/OverlappingCardsScrollRN.native'
+import type {
+  OverlappingCardsScrollRNTabProps,
+  OverlappingCardsScrollRNTabsContainerProps,
+} from './src/rn/OverlappingCardsScrollRN.native'
 
 const LONG_SCROLL_LINES = [
   'Line 01: Long-form content inside this card should scroll vertically.',
@@ -140,6 +144,51 @@ function ExpoCard({ tag, title, body, color, scrollLines = undefined }) {
   )
 }
 
+function ExpoTabsContainer({
+  children,
+  style,
+  ariaLabel,
+}: OverlappingCardsScrollRNTabsContainerProps) {
+  return (
+    <View style={[styles.demoTabsContainer, style]} accessibilityRole="tablist" accessibilityLabel={ariaLabel}>
+      {children}
+    </View>
+  )
+}
+
+function ExpoTab({
+  name,
+  isPrincipal,
+  style,
+  textStyle,
+  accessibilityLabel,
+  accessibilityState,
+  onPress,
+  onClick,
+}: OverlappingCardsScrollRNTabProps) {
+  const handlePress = () => {
+    onClick?.()
+    onPress?.()
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={accessibilityState}
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.demoTab,
+        isPrincipal && styles.demoTabActive,
+        pressed && styles.demoTabPressed,
+        style,
+      ]}
+    >
+      <Text style={[styles.demoTabText, isPrincipal && styles.demoTabTextActive, textStyle]}>{name}</Text>
+    </Pressable>
+  )
+}
+
 export default function App() {
   const normalCardHeight = Platform.OS === 'ios' ? 500 : 280
   const stressCardHeight = Platform.OS === 'ios' ? 500 : 280
@@ -151,7 +200,9 @@ export default function App() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Normal Instance</Text>
-        <Text style={styles.sectionDescription}>Base deck with nested vertical content inside card 2.</Text>
+        <Text style={styles.sectionDescription}>
+          Uses `items`, custom tabs, and card container styling on native.
+        </Text>
         <OverlappingCardsScrollRN
           cardHeight={normalCardHeight}
           basePeek={58}
@@ -159,11 +210,18 @@ export default function App() {
           showPageDots
           pageDotsPosition="above"
           pageDotsOffset={8}
-        >
-          {EXPO_CARDS.map((card) => (
-            <ExpoCard key={card.id} {...card} />
-          ))}
-        </OverlappingCardsScrollRN>
+          showTabs
+          tabsPosition="above"
+          tabsOffset={8}
+          tabsComponent={ExpoTab}
+          tabsContainerComponent={ExpoTabsContainer}
+          cardContainerStyle={styles.normalCardContainer}
+          items={EXPO_CARDS.map((card) => ({
+            id: card.id,
+            name: card.title,
+            jsx: <ExpoCard {...card} />,
+          }))}
+        />
       </View>
 
       <View style={styles.section}>
@@ -262,6 +320,40 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '600',
     marginBottom: 8,
+  },
+  demoTabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  demoTab: {
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: 'rgba(23, 48, 71, 0.24)',
+    backgroundColor: '#edf5ff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginHorizontal: 4,
+    marginVertical: 4,
+  },
+  demoTabActive: {
+    backgroundColor: '#173047',
+    borderColor: '#173047',
+  },
+  demoTabPressed: {
+    opacity: 0.82,
+  },
+  demoTabText: {
+    color: '#2f4d65',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  demoTabTextActive: {
+    color: '#f5f9ff',
+  },
+  normalCardContainer: {
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   card: {
     flex: 1,

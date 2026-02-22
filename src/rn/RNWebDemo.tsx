@@ -4,6 +4,10 @@ import {
   OverlappingCardsScrollRN,
   OverlappingCardsScrollRNFocusTrigger,
 } from './OverlappingCardsScrollRN.web'
+import type {
+  OverlappingCardsScrollRNTabProps,
+  OverlappingCardsScrollRNTabsContainerProps,
+} from './OverlappingCardsScrollRN.web'
 
 const RN_DEMO_CARDS = [
   {
@@ -63,6 +67,51 @@ function RNCard({ tag, title, body, color }) {
   )
 }
 
+function RNWebTabsContainer({
+  children,
+  style,
+  ariaLabel,
+}: OverlappingCardsScrollRNTabsContainerProps) {
+  return (
+    <View style={[styles.tabsContainer, style]} accessibilityRole="tablist" accessibilityLabel={ariaLabel}>
+      {children}
+    </View>
+  )
+}
+
+function RNWebTab({
+  name,
+  isPrincipal,
+  style,
+  textStyle,
+  accessibilityLabel,
+  accessibilityState,
+  onPress,
+  onClick,
+}: OverlappingCardsScrollRNTabProps) {
+  const handlePress = () => {
+    onClick?.()
+    onPress?.()
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={accessibilityState}
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.tab,
+        isPrincipal && styles.tabActive,
+        pressed && styles.tabPressed,
+        style,
+      ]}
+    >
+      <Text style={[styles.tabText, isPrincipal && styles.tabTextActive, textStyle]}>{name}</Text>
+    </Pressable>
+  )
+}
+
 export function RNWebDemo() {
   return (
     <View style={styles.root}>
@@ -73,12 +122,19 @@ export function RNWebDemo() {
         showPageDots
         pageDotsPosition="below"
         pageDotsOffset={10}
+        showTabs
+        tabsPosition="above"
+        tabsOffset={10}
+        tabsComponent={RNWebTab}
+        tabsContainerComponent={RNWebTabsContainer}
+        cardContainerStyle={styles.cardContainer}
         showsHorizontalScrollIndicator
-      >
-        {RN_DEMO_CARDS.map((card) => (
-          <RNCard key={card.id} {...card} />
-        ))}
-      </OverlappingCardsScrollRN>
+        items={RN_DEMO_CARDS.map((card) => ({
+          id: card.id,
+          name: card.title,
+          jsx: <RNCard {...card} />,
+        }))}
+      />
     </View>
   )
 }
@@ -92,6 +148,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 10,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  tab: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(31, 70, 102, 0.26)',
+    backgroundColor: '#eef6ff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginHorizontal: 4,
+    marginVertical: 4,
+  },
+  tabActive: {
+    backgroundColor: '#1f4666',
+    borderColor: '#1f4666',
+  },
+  tabPressed: {
+    opacity: 0.82,
+  },
+  tabText: {
+    color: '#1f4666',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  tabTextActive: {
+    color: '#f4f9ff',
+  },
+  cardContainer: {
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   card: {
     flex: 1,

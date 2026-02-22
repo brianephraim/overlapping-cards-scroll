@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { OverlappingCardsScroll, OverlappingCardsScrollFocusTrigger } from './lib'
+import {
+  OverlappingCardsScroll,
+  OverlappingCardsScrollFocusTrigger,
+} from './lib'
+import type {
+  OverlappingCardsScrollTabProps,
+  OverlappingCardsScrollTabsContainerProps,
+} from './lib'
 import { RNWebDemo } from './rn/RNWebDemo'
 import './App.css'
 
@@ -180,6 +187,51 @@ function StressCard({ index }) {
   )
 }
 
+function DemoTabsContainer({
+  children,
+  className,
+  style,
+  ariaLabel,
+}: OverlappingCardsScrollTabsContainerProps) {
+  return (
+    <nav
+      className={className}
+      style={{ ...style, rowGap: 8 }}
+      aria-label={ariaLabel}
+    >
+      {children}
+    </nav>
+  )
+}
+
+function DemoTab({
+  name,
+  className,
+  style,
+  isPrincipal,
+  ariaLabel,
+  ariaCurrent,
+  onClick,
+}: OverlappingCardsScrollTabProps) {
+  return (
+    <button
+      type="button"
+      className={className}
+      style={{
+        ...style,
+        borderRadius: 999,
+        border: '1px solid rgba(25, 56, 82, 0.24)',
+        fontWeight: isPrincipal ? 700 : 600,
+      }}
+      aria-label={ariaLabel}
+      aria-current={ariaCurrent}
+      onClick={onClick}
+    >
+      {name}
+    </button>
+  )
+}
+
 function DemoStage({ pageId }) {
   if (pageId === 'rnweb') {
     return <RNWebDemo />
@@ -194,6 +246,10 @@ function DemoStage({ pageId }) {
         pageDotsPosition="below"
         showTabs
         tabsPosition="above"
+        tabsOffset={10}
+        tabsComponent={DemoTab}
+        tabsContainerComponent={DemoTabsContainer}
+        cardContainerStyle={{ borderRadius: 18, overflow: 'hidden' }}
         items={CONTENT_CARD_DATA.map((card) => ({
           name: card.title,
           id: card.id,
@@ -228,6 +284,10 @@ function DemoStage({ pageId }) {
       pageDotsPosition="overlay"
       showTabs
       tabsPosition="above"
+      tabsOffset={8}
+      tabsComponent={DemoTab}
+      tabsContainerComponent={DemoTabsContainer}
+      cardContainerStyle={{ borderRadius: 18, overflow: 'hidden' }}
       items={BASIC_CARD_DATA.map((card) => ({
         name: card.title,
         id: card.id,
@@ -306,6 +366,10 @@ function App() {
 <OverlappingCardsScroll
   cardHeight={280}
   showTabs
+  tabsOffset={8}
+  tabsComponent={DemoTab}
+  tabsContainerComponent={DemoTabsContainer}
+  cardContainerStyle={{ borderRadius: 18, overflow: 'hidden' }}
   items={cards.map((c) => ({
     name: c.title,
     id: c.id,

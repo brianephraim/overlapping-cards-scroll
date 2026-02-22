@@ -68,16 +68,24 @@ import 'overlapping-cards-scroll/styles.css'
 ## Props
 
 - `children`: card nodes
+- `items` (`{ id: string | number; name: string; jsx: ReactElement }[]`) optional alternative to `children`; required for named tabs (`showTabs`)
 - `cardHeight` (`number | string`, default `300`)
 - `cardWidth` (`number | string`) accepts px number (e.g. `250`) or percent string (e.g. `'50%'`)
 - `cardWidthRatio` (`number`, default `1 / 3`)
 - `basePeek` (`number`, default `64`)
 - `minPeek` (`number`, default `10`)
 - `maxPeek` (`number`, default `84`)
+- `cardContainerStyle` (web: `CSSProperties`, RN native: `StyleProp<ViewStyle>`) applied to each positioned card container
 - `showPageDots` (`boolean`, default `false`) renders clickable page dots
 - `pageDotsPosition` (`'above' | 'below' | 'overlay'`, default `'below'`)
 - `pageDotsOffset` (`number | string`, default `10`) distance from stage
 - `pageDotsBehavior` (`'smooth' | 'auto'`, web only, default `'smooth'`)
+- `showTabs` (`boolean`, default `false`) renders card-name tabs when `items` is provided
+- `tabsPosition` (`'above' | 'below'`, default `'above'`)
+- `tabsOffset` (`number | string`, default `10`)
+- `tabsBehavior` (`'smooth' | 'auto'`, web only, default `'smooth'`)
+- `tabsComponent` (custom tab renderer; supported on web and RN native)
+- `tabsContainerComponent` (custom tab container renderer; supported on web and RN native)
 - `snapToCardOnRelease` (`boolean`, default `true`) web/RN-web uses idle + mousemove snap, RN native uses `snapToInterval` on iOS
 - `snapReleaseDelay` (`number`, default `800`) web/RN-web debounce before auto-snap
 - `snapDecelerationRate` (`'normal' | 'fast' | number`, RN native only, default `'normal'`) controls fling feel while snapping
