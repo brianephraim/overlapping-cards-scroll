@@ -64,6 +64,11 @@ const PAGE_DOT_POSITIONS = new Set(['above', 'below', 'overlay'])
 const normalizePageDotsPosition = (value) =>
   PAGE_DOT_POSITIONS.has(value) ? value : 'below'
 
+const TAB_POSITIONS = new Set(['above', 'below'])
+
+const normalizeTabsPosition = (value) =>
+  TAB_POSITIONS.has(value) ? value : 'above'
+
 const resolveCardX = (index, principalIndex, transitionProgress, layout) => {
   if (index <= principalIndex) {
     return index * layout.peek
@@ -622,9 +627,55 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   const resolvedPageDotsPosition = normalizePageDotsPosition(pageDotsPosition)
   const showNavigationDots = showPageDots && cardCount > 1
 
+  const resolvedTabsPosition = normalizeTabsPosition(tabsPosition)
+  const showNavigationTabs = showTabs && cardCount > 1 && cardNames !== null
+
+  if (showTabs && cardNames === null) {
+    console.warn(
+      'OverlappingCardsScroll: `showTabs` requires the `items` prop to provide card names. Tabs will not render.'
+    )
+  }
+
   return (
     <OverlappingCardsScrollControllerContext.Provider value={controllerContextValue}>
       <section className={containerClassName} aria-label={ariaLabel} ref={containerRef}>
+        {showNavigationTabs && resolvedTabsPosition === 'above' ? (
+          <nav
+            className={
+              tabsClassName
+                ? `ocs-tabs ocs-tabs--above ${tabsClassName}`
+                : 'ocs-tabs ocs-tabs--above'
+            }
+            style={{ marginBottom: toCssDimension(tabsOffset) }}
+            aria-label="Card tabs"
+          >
+            {cardNames.map((name, index) => {
+              const influence = clamp(1 - Math.abs(progress - index), 0, 1)
+              return (
+                <button
+                  key={`ocs-tab-above-${index}`}
+                  type="button"
+                  className={
+                    influence > 0.98
+                      ? 'ocs-tab ocs-tab--active'
+                      : 'ocs-tab'
+                  }
+                  aria-label={`Go to ${name}`}
+                  aria-current={influence > 0.98 ? 'page' : undefined}
+                  onClick={() =>
+                    focusCard(index, {
+                      behavior: tabsBehavior,
+                      transitionMode: 'swoop',
+                    })
+                  }
+                  style={{ opacity: 0.45 + influence * 0.55 }}
+                >
+                  {name}
+                </button>
+              )
+            })}
+          </nav>
+        ) : null}
         {showNavigationDots && resolvedPageDotsPosition === 'above' ? (
           <nav
             className={
@@ -775,6 +826,43 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
                   }
                   style={{ opacity, transform: `scale(${scale})` }}
                 />
+              )
+            })}
+          </nav>
+        ) : null}
+        {showNavigationTabs && resolvedTabsPosition === 'below' ? (
+          <nav
+            className={
+              tabsClassName
+                ? `ocs-tabs ocs-tabs--below ${tabsClassName}`
+                : 'ocs-tabs ocs-tabs--below'
+            }
+            style={{ marginTop: toCssDimension(tabsOffset) }}
+            aria-label="Card tabs"
+          >
+            {cardNames.map((name, index) => {
+              const influence = clamp(1 - Math.abs(progress - index), 0, 1)
+              return (
+                <button
+                  key={`ocs-tab-below-${index}`}
+                  type="button"
+                  className={
+                    influence > 0.98
+                      ? 'ocs-tab ocs-tab--active'
+                      : 'ocs-tab'
+                  }
+                  aria-label={`Go to ${name}`}
+                  aria-current={influence > 0.98 ? 'page' : undefined}
+                  onClick={() =>
+                    focusCard(index, {
+                      behavior: tabsBehavior,
+                      transitionMode: 'swoop',
+                    })
+                  }
+                  style={{ opacity: 0.45 + influence * 0.55 }}
+                >
+                  {name}
+                </button>
               )
             })}
           </nav>
