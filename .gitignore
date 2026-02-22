@@ -32,6 +32,9 @@ coverage
 .expo-shared
 .playwright-mcp
 
+# Planning docs (local only)
+docs/plans
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
