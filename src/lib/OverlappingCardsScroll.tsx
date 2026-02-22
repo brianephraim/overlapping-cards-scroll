@@ -127,6 +127,8 @@ export function OverlappingCardsScroll({
   pageDotsOffset = 10,
   pageDotsBehavior = 'smooth',
   pageDotsClassName = '',
+  cardContainerClassName = '',
+  cardContainerStyle = {},
   snapToCardOnRelease = true,
   snapReleaseDelay = 800,
   focusTransitionDuration = 420,
@@ -428,45 +430,59 @@ export function OverlappingCardsScroll({
     [focusCard],
   )
 
-  const setControllerScroll = (nextValue) => {
-    const scrollElement = scrollRef.current
-    if (!scrollElement) {
-      return
-    }
+  const setControllerScroll = useCallback(
+    (nextValue) => {
+      const scrollElement = scrollRef.current
+      if (!scrollElement) {
+        return
+      }
 
-    const nextScrollLeft = clamp(nextValue, 0, layout.scrollRange)
-    if (scrollElement.scrollLeft !== nextScrollLeft) {
-      scrollElement.scrollLeft = nextScrollLeft
-    }
-    setScrollLeft(nextScrollLeft)
-  }
+      const nextScrollLeft = clamp(nextValue, 0, layout.scrollRange)
+      if (scrollElement.scrollLeft !== nextScrollLeft) {
+        scrollElement.scrollLeft = nextScrollLeft
+      }
+      setScrollLeft(nextScrollLeft)
+    },
+    [layout.scrollRange],
+  )
 
-  const applyScrollDelta = (delta) => {
-    const scrollElement = scrollRef.current
-    if (!scrollElement) {
-      return
-    }
+  const applyScrollDelta = useCallback(
+    (delta) => {
+      const scrollElement = scrollRef.current
+      if (!scrollElement) {
+        return
+      }
 
-    setControllerScroll(scrollElement.scrollLeft + delta)
-  }
+      setControllerScroll(scrollElement.scrollLeft + delta)
+    },
+    [setControllerScroll],
+  )
 
-  const handleWheel = (event) => {
-    if (cardCount < 2) {
-      return
-    }
+  const handleWheel = useCallback(
+    (event: WheelEvent) => {
+      if (cardCount < 2) {
+        return
+      }
 
-    const delta =
-      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+      const absX = Math.abs(event.deltaX)
+      const absY = Math.abs(event.deltaY)
 
-    if (delta === 0) {
-      return
-    }
+      if (absX === 0 && absY === 0) {
+        return
+      }
 
-    event.preventDefault()
-    cancelFocusTransition()
-    applyScrollDelta(delta)
-    markSnapCandidateFromScroll()
-  }
+      // Let vertical-dominant scrolls pass through to child scrollables
+      if (absY > absX) {
+        return
+      }
+
+      event.preventDefault()
+      cancelFocusTransition()
+      applyScrollDelta(event.deltaX)
+      markSnapCandidateFromScroll()
+    },
+    [cardCount, cancelFocusTransition, applyScrollDelta, markSnapCandidateFromScroll],
+  )
 
   const handleTouchStart = (event) => {
     if (cardCount < 2) {
@@ -510,6 +526,20 @@ export function OverlappingCardsScroll({
     }
     touchStateRef.current = null
   }
+
+  const stageRef = useRef(null)
+
+  useEffect(() => {
+    const stageElement = stageRef.current
+    if (!stageElement) {
+      return undefined
+    }
+
+    stageElement.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      stageElement.removeEventListener('wheel', handleWheel)
+    }
+  }, [handleWheel])
 
   const containerClassName = className
     ? `overlapping-cards-scroll ${className}`
@@ -557,10 +587,10 @@ export function OverlappingCardsScroll({
         <div className="ocs-stage-frame">
           <div
             className="ocs-stage"
+            ref={stageRef}
             style={{
               height: toCssDimension(cardHeight),
             }}
-            onWheel={handleWheel}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -578,12 +608,19 @@ export function OverlappingCardsScroll({
                 return (
                   <div
                     key={card.key ?? `ocs-card-${index}`}
-                    className={focusTransition ? 'ocs-card ocs-card--focus-transition' : 'ocs-card'}
+                    className={
+                      cardContainerClassName
+                        ? `${focusTransition ? 'ocs-card ocs-card--focus-transition' : 'ocs-card'} ${cardContainerClassName}`
+                        : focusTransition
+                          ? 'ocs-card ocs-card--focus-transition'
+                          : 'ocs-card'
+                    }
                     style={{
                       width: `${layout.cardWidth}px`,
                       height: toCssDimension(cardHeight),
                       transform: `translate3d(${cardX}px, 0, 0)`,
                       transitionDuration: focusTransition ? `${focusTransition.duration}ms` : undefined,
+                      ...cardContainerStyle,
                     }}
                   >
                     <OverlappingCardsScrollCardIndexContext.Provider value={index}>
