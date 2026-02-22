@@ -30,6 +30,7 @@ coverage
 .eslintcache
 .expo
 .expo-shared
+.playwright-mcp
 
 # Editor directories and files
 .vscode/*
