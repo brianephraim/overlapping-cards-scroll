@@ -52,5 +52,7 @@ const styles = StyleSheet.create({
   root: {
     width: '100%',
     minWidth: 0,
+    flex: 1,
+    minHeight: 0,
   },
 })
