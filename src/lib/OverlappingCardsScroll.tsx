@@ -201,21 +201,24 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     }
   }, [hasItems, hasChildren])
 
+  const itemsProp = hasItems ? props.items : null
+  const childrenProp = hasChildren ? props.children : null
+
   const cards = useMemo(() => {
-    if (hasItems) {
-      return props.items.map((item) => (
+    if (itemsProp) {
+      return itemsProp.map((item) => (
         <Fragment key={item.id}>{item.jsx}</Fragment>
       ))
     }
-    return Children.toArray(hasChildren ? props.children : null) as ReactElement[]
-  }, [hasItems, hasChildren, hasItems ? props.items : null, hasChildren ? props.children : null])
+    return Children.toArray(childrenProp) as ReactElement[]
+  }, [itemsProp, childrenProp])
 
   const cardNames: string[] | null = useMemo(() => {
-    if (hasItems) {
-      return props.items.map((item) => item.name)
+    if (itemsProp) {
+      return itemsProp.map((item) => item.name)
     }
     return null
-  }, [hasItems, hasItems ? props.items : null])
+  }, [itemsProp])
 
   const cardCount = cards.length
 
