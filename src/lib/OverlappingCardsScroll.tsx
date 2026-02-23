@@ -942,13 +942,21 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
                         ? `${focusTransition.duration}ms`
                         : undefined,
                       ...cardContainerStyle,
+                      pointerEvents: "none",
                     }}
                   >
-                    <OverlappingCardsScrollCardIndexContext.Provider
-                      value={index}
+                    <div
+                      style={{
+                        pointerEvents: "auto",
+                        display: "flex",
+                      }}
                     >
-                      {card}
-                    </OverlappingCardsScrollCardIndexContext.Provider>
+                      <OverlappingCardsScrollCardIndexContext.Provider
+                        value={index}
+                      >
+                        {card}
+                      </OverlappingCardsScrollCardIndexContext.Provider>
+                    </div>
                   </div>
                 );
               })}
