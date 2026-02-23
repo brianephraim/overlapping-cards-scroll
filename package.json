@@ -36,6 +36,10 @@
       "require": "./dist/react-native-web.cjs",
       "default": "./dist/react-native-web.js"
     },
+    "./src": "./src/lib/index.ts",
+    "./src/lib": "./src/lib/index.ts",
+    "./src/lib/*": "./src/lib/*",
+    "./src/rn/*": "./src/rn/*",
     "./package.json": "./package.json"
   },
   "files": [
@@ -77,7 +81,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview --outDir web-build",
-    "prepack": "npm run build:package"
+    "prepack": "npm run build:package",
+    "patch": "npm version patch",
+    "publish": "npm publish --access public",
+    "npmlogin": "npm login"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
