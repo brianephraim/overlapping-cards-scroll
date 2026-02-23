@@ -40,6 +40,8 @@
   },
   "files": [
     "dist",
+    "src/lib",
+    "src/rn",
     "README.md",
     "LICENSE"
   ],
