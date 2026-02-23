@@ -1,6 +1,6 @@
 {
   "name": "overlapping-cards-scroll",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Overlapping cards scroll component for React, React Native, and React Native Web.",
   "license": "MIT",
   "type": "module",
