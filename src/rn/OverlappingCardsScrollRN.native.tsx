@@ -892,6 +892,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
+    flexDirection: "column",
   },
   pageDotsRow: {
     width: "100%",

@@ -949,6 +949,7 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
                       style={{
                         pointerEvents: "auto",
                         display: "flex",
+                        flexDirection: "column",
                       }}
                     >
                       <OverlappingCardsScrollCardIndexContext.Provider
