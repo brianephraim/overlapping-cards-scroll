@@ -1,10 +1,10 @@
 export {
   OverlappingCardsScroll,
   OverlappingCardsScrollFocusTrigger,
-} from './OverlappingCardsScroll'
+} from "./OverlappingCardsScroll";
 
 export type {
   CardItem,
   OverlappingCardsScrollTabProps,
   OverlappingCardsScrollTabsContainerProps,
-} from './OverlappingCardsScroll'
+} from "./OverlappingCardsScroll";

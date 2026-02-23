@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Grotesk:wght@400;500;700&display=swap");
 
 :root {
-  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 420;
   font-synthesis: none;
@@ -15,8 +15,16 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(1200px 500px at 8% -5%, rgba(116, 191, 166, 0.32), transparent 62%),
-    radial-gradient(760px 420px at 90% 16%, rgba(66, 126, 185, 0.3), transparent 60%),
+    radial-gradient(
+      1200px 500px at 8% -5%,
+      rgba(116, 191, 166, 0.32),
+      transparent 62%
+    ),
+    radial-gradient(
+      760px 420px at 90% 16%,
+      rgba(66, 126, 185, 0.3),
+      transparent 60%
+    ),
     #f0e8da;
 }
 

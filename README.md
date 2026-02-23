@@ -18,15 +18,19 @@ Peer dependencies:
 ## Web Usage
 
 ```tsx
-import 'overlapping-cards-scroll/styles.css'
+import "overlapping-cards-scroll/styles.css";
 import {
   OverlappingCardsScroll,
   OverlappingCardsScrollFocusTrigger,
-} from 'overlapping-cards-scroll'
+} from "overlapping-cards-scroll";
 
 export function Example({ cards }) {
   return (
-    <OverlappingCardsScroll cardHeight={280} showPageDots pageDotsPosition="below">
+    <OverlappingCardsScroll
+      cardHeight={280}
+      showPageDots
+      pageDotsPosition="below"
+    >
       {cards.map((card) => (
         <article key={card.id}>
           <h3>{card.title}</h3>
@@ -36,7 +40,7 @@ export function Example({ cards }) {
         </article>
       ))}
     </OverlappingCardsScroll>
-  )
+  );
 }
 ```
 
@@ -46,7 +50,7 @@ export function Example({ cards }) {
 import {
   OverlappingCardsScrollRN,
   OverlappingCardsScrollRNFocusTrigger,
-} from 'overlapping-cards-scroll/react-native'
+} from "overlapping-cards-scroll/react-native";
 ```
 
 `/react-native` resolves to:
@@ -62,7 +66,7 @@ You can also target explicit builds:
 For web adapter usage, import package styles:
 
 ```tsx
-import 'overlapping-cards-scroll/styles.css'
+import "overlapping-cards-scroll/styles.css";
 ```
 
 ## Props

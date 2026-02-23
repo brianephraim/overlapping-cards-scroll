@@ -108,7 +108,10 @@
   border-radius: 999px;
   background: #1f4666;
   cursor: pointer;
-  transition: opacity 130ms ease, transform 130ms ease, filter 130ms ease;
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease,
+    filter 130ms ease;
 }
 
 .ocs-page-dot:hover {
@@ -134,7 +137,10 @@
   letter-spacing: 0.04em;
   padding: 0.34rem 0.6rem;
   cursor: pointer;
-  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
 .ocs-focus-trigger:hover {
@@ -178,8 +184,11 @@
   padding: 0.34rem 0.72rem;
   white-space: nowrap;
   cursor: pointer;
-  transition: opacity 160ms ease, background 160ms ease,
-              border-color 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
   flex-shrink: 0;
 }
 

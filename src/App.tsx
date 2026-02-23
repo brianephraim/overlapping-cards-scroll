@@ -1,135 +1,158 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   OverlappingCardsScroll,
   OverlappingCardsScrollFocusTrigger,
-} from './lib'
+} from "./lib";
 import type {
   OverlappingCardsScrollTabProps,
   OverlappingCardsScrollTabsContainerProps,
-} from './lib'
-import { RNWebDemo } from './rn/RNWebDemo'
-import './App.css'
+} from "./lib";
+import { RNWebDemo } from "./rn/RNWebDemo";
+import "./App.css";
 
 const DEMO_PAGES = {
   basic: {
-    label: 'Foundation',
-    title: 'Basic Narrative Cards',
+    label: "Foundation",
+    title: "Basic Narrative Cards",
     description:
-      'Single-column content cards to validate overlap behavior and card progression between indices.',
+      "Single-column content cards to validate overlap behavior and card progression between indices.",
   },
   content: {
-    label: 'Rich Content',
-    title: 'Product-Rich Cards',
+    label: "Rich Content",
+    title: "Product-Rich Cards",
     description:
-      'Mixed content cards with badges, metrics, and lists to test realistic card body composition.',
+      "Mixed content cards with badges, metrics, and lists to test realistic card body composition.",
   },
   stress: {
-    label: 'Stress Test',
-    title: 'Many-Card Stack',
+    label: "Stress Test",
+    title: "Many-Card Stack",
     description:
-      'A larger deck to verify left-edge visibility and spacing when many cards share the same container.',
+      "A larger deck to verify left-edge visibility and spacing when many cards share the same container.",
   },
   rnweb: {
-    label: 'RN Web',
-    title: 'React Native Web Implementation',
+    label: "RN Web",
+    title: "React Native Web Implementation",
     description:
-      'Prototype built with react-native primitives (View/Text/ScrollView) for easier Expo-native follow-up.',
+      "Prototype built with react-native primitives (View/Text/ScrollView) for easier Expo-native follow-up.",
   },
-}
+};
 
 const BASIC_CARD_DATA = [
   {
-    id: 'brief',
-    tag: 'Card 01',
-    title: 'Project Brief',
-    body: 'Define constraints for overlap transitions and lock the single-card focus model.',
-    accent: '#0f8b8d',
+    id: "brief",
+    tag: "Card 01",
+    title: "Project Brief",
+    body: "Define constraints for overlap transitions and lock the single-card focus model.",
+    accent: "#0f8b8d",
   },
   {
-    id: 'wire',
-    tag: 'Card 02',
-    title: 'Wireframe Pass',
-    body: 'Block out card rhythm so each next card emerges cleanly while previous cards stay visible.',
-    accent: '#f4a261',
+    id: "wire",
+    tag: "Card 02",
+    title: "Wireframe Pass",
+    body: "Block out card rhythm so each next card emerges cleanly while previous cards stay visible.",
+    accent: "#f4a261",
   },
   {
-    id: 'build',
-    tag: 'Card 03',
-    title: 'Component Build',
-    body: 'Translate the movement math into a reusable React component and expose sensible props.',
-    accent: '#2a9d8f',
+    id: "build",
+    tag: "Card 03",
+    title: "Component Build",
+    body: "Translate the movement math into a reusable React component and expose sensible props.",
+    accent: "#2a9d8f",
   },
   {
-    id: 'qa',
-    tag: 'Card 04',
-    title: 'QA Pass',
-    body: 'Validate that all left edges remain visible and that each card becomes the primary surface.',
-    accent: '#e76f51',
+    id: "qa",
+    tag: "Card 04",
+    title: "QA Pass",
+    body: "Validate that all left edges remain visible and that each card becomes the primary surface.",
+    accent: "#e76f51",
   },
   {
-    id: 'ship',
-    tag: 'Card 05',
-    title: 'Ship & Iterate',
-    body: 'Collect feedback and tune peek spacing for dense decks and small viewport widths.',
-    accent: '#3a86ff',
+    id: "ship",
+    tag: "Card 05",
+    title: "Ship & Iterate",
+    body: "Collect feedback and tune peek spacing for dense decks and small viewport widths.",
+    accent: "#3a86ff",
   },
-]
+];
 
 const CONTENT_CARD_DATA = [
   {
-    id: 'alpha',
-    label: 'Alpha Batch',
-    title: 'Telemetry Dashboard',
-    score: '98% uptime',
-    bullets: ['Session replay linked', 'Errors grouped by fingerprint', 'Deploy metadata attached'],
-    tone: '#335c67',
+    id: "alpha",
+    label: "Alpha Batch",
+    title: "Telemetry Dashboard",
+    score: "98% uptime",
+    bullets: [
+      "Session replay linked",
+      "Errors grouped by fingerprint",
+      "Deploy metadata attached",
+    ],
+    tone: "#335c67",
   },
   {
-    id: 'beta',
-    label: 'Beta Batch',
-    title: 'Launch Checklist',
-    score: '11 blockers',
-    bullets: ['Input validation pass', 'Release note draft', 'Rollback script verified'],
-    tone: '#9e2a2b',
+    id: "beta",
+    label: "Beta Batch",
+    title: "Launch Checklist",
+    score: "11 blockers",
+    bullets: [
+      "Input validation pass",
+      "Release note draft",
+      "Rollback script verified",
+    ],
+    tone: "#9e2a2b",
   },
   {
-    id: 'gamma',
-    label: 'Gamma Batch',
-    title: 'Customer Signals',
-    score: '42 insights',
-    bullets: ['Top 3 feature requests', 'NPS segment summary', 'Renewal risk watchlist'],
-    tone: '#386641',
+    id: "gamma",
+    label: "Gamma Batch",
+    title: "Customer Signals",
+    score: "42 insights",
+    bullets: [
+      "Top 3 feature requests",
+      "NPS segment summary",
+      "Renewal risk watchlist",
+    ],
+    tone: "#386641",
   },
   {
-    id: 'delta',
-    label: 'Delta Batch',
-    title: 'Growth Snapshot',
-    score: '+18.4% QoQ',
-    bullets: ['Acquisition costs down', 'Activation path cleaned', 'Retention curve improving'],
-    tone: '#7c3aed',
+    id: "delta",
+    label: "Delta Batch",
+    title: "Growth Snapshot",
+    score: "+18.4% QoQ",
+    bullets: [
+      "Acquisition costs down",
+      "Activation path cleaned",
+      "Retention curve improving",
+    ],
+    tone: "#7c3aed",
   },
-]
+];
 
-const STRESS_CARD_COUNT = 14
+const STRESS_CARD_COUNT = 14;
 
-const pageOrder = Object.keys(DEMO_PAGES)
+const pageOrder = Object.keys(DEMO_PAGES);
 
 const parseHashPage = () => {
-  const hash = window.location.hash.replace('#', '').trim().toLowerCase()
+  const hash = window.location.hash.replace("#", "").trim().toLowerCase();
   if (hash && DEMO_PAGES[hash]) {
-    return hash
+    return hash;
   }
-  return pageOrder[0]
-}
+  return pageOrder[0];
+};
 
 function BasicCard({ tag, title, body, accent }) {
-  const [clickCount, setClickCount] = useState(0)
+  const [clickCount, setClickCount] = useState(0);
 
   return (
-    <article className="demo-card basic-card" style={{ '--card-accent': accent } as CSSProperties}>
+    <article
+      className="demo-card basic-card"
+      style={{ "--card-accent": accent } as CSSProperties}
+    >
       <p className="card-tag">{tag}</p>
-      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+      <button
+        type="button"
+        className="card-counter"
+        onClick={() => setClickCount((count) => count + 1)}
+      >
         Clicks: {clickCount}
       </button>
       <OverlappingCardsScrollFocusTrigger className="card-counter">
@@ -138,19 +161,26 @@ function BasicCard({ tag, title, body, accent }) {
       <h3>{title}</h3>
       <p>{body}</p>
     </article>
-  )
+  );
 }
 
 function ContentCard({ label, title, score, bullets, tone }) {
-  const [clickCount, setClickCount] = useState(0)
+  const [clickCount, setClickCount] = useState(0);
 
   return (
-    <article className="demo-card content-card" style={{ '--card-accent': tone } as CSSProperties}>
+    <article
+      className="demo-card content-card"
+      style={{ "--card-accent": tone } as CSSProperties}
+    >
       <header className="content-card-header">
         <span>{label}</span>
         <strong>{score}</strong>
       </header>
-      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+      <button
+        type="button"
+        className="card-counter"
+        onClick={() => setClickCount((count) => count + 1)}
+      >
         Clicks: {clickCount}
       </button>
       <OverlappingCardsScrollFocusTrigger className="card-counter">
@@ -163,28 +193,35 @@ function ContentCard({ label, title, score, bullets, tone }) {
         ))}
       </ul>
     </article>
-  )
+  );
 }
 
 function StressCard({ index }) {
-  const [clickCount, setClickCount] = useState(0)
-  const hue = (index * 25) % 360
+  const [clickCount, setClickCount] = useState(0);
+  const hue = (index * 25) % 360;
   return (
     <article
       className="demo-card stress-card"
-      style={{ '--stress-tone': `hsl(${hue} 65% 45%)` } as CSSProperties}
+      style={{ "--stress-tone": `hsl(${hue} 65% 45%)` } as CSSProperties}
     >
-      <p className="card-tag">Card {String(index + 1).padStart(2, '0')}</p>
-      <button type="button" className="card-counter" onClick={() => setClickCount((count) => count + 1)}>
+      <p className="card-tag">Card {String(index + 1).padStart(2, "0")}</p>
+      <button
+        type="button"
+        className="card-counter"
+        onClick={() => setClickCount((count) => count + 1)}
+      >
         Clicks: {clickCount}
       </button>
       <OverlappingCardsScrollFocusTrigger className="card-counter">
         Make principal
       </OverlappingCardsScrollFocusTrigger>
       <h3>Deck Position #{index + 1}</h3>
-      <p>Edge visibility remains maintained while this card joins the active position.</p>
+      <p>
+        Edge visibility remains maintained while this card joins the active
+        position.
+      </p>
     </article>
-  )
+  );
 }
 
 function DemoTabsContainer({
@@ -201,7 +238,7 @@ function DemoTabsContainer({
     >
       {children}
     </nav>
-  )
+  );
 }
 
 function DemoTab({
@@ -220,7 +257,7 @@ function DemoTab({
       style={{
         ...style,
         borderRadius: 999,
-        border: '1px solid rgba(25, 56, 82, 0.24)',
+        border: "1px solid rgba(25, 56, 82, 0.24)",
         fontWeight: isPrincipal ? 700 : 600,
       }}
       aria-label={ariaLabel}
@@ -229,15 +266,15 @@ function DemoTab({
     >
       {name}
     </button>
-  )
+  );
 }
 
 function DemoStage({ pageId }) {
-  if (pageId === 'rnweb') {
-    return <RNWebDemo />
+  if (pageId === "rnweb") {
+    return <RNWebDemo />;
   }
 
-  if (pageId === 'content') {
+  if (pageId === "content") {
     return (
       <OverlappingCardsScroll
         cardHeight={320}
@@ -249,17 +286,17 @@ function DemoStage({ pageId }) {
         tabsOffset={10}
         tabsComponent={DemoTab}
         tabsContainerComponent={DemoTabsContainer}
-        cardContainerStyle={{ borderRadius: 18, overflow: 'hidden' }}
+        cardContainerStyle={{ borderRadius: 18, overflow: "hidden" }}
         items={CONTENT_CARD_DATA.map((card) => ({
           name: card.title,
           id: card.id,
           jsx: <ContentCard {...card} />,
         }))}
       />
-    )
+    );
   }
 
-  if (pageId === 'stress') {
+  if (pageId === "stress") {
     return (
       <OverlappingCardsScroll
         cardHeight={250}
@@ -273,7 +310,7 @@ function DemoStage({ pageId }) {
           <StressCard key={`stress-${index}`} index={index} />
         ))}
       </OverlappingCardsScroll>
-    )
+    );
   }
 
   return (
@@ -287,36 +324,36 @@ function DemoStage({ pageId }) {
       tabsOffset={8}
       tabsComponent={DemoTab}
       tabsContainerComponent={DemoTabsContainer}
-      cardContainerStyle={{ borderRadius: 18, overflow: 'hidden' }}
+      cardContainerStyle={{ borderRadius: 18, overflow: "hidden" }}
       items={BASIC_CARD_DATA.map((card) => ({
         name: card.title,
         id: card.id,
         jsx: <BasicCard {...card} />,
       }))}
     />
-  )
+  );
 }
 
 function App() {
-  const [pageId, setPageId] = useState(() => parseHashPage())
+  const [pageId, setPageId] = useState(() => parseHashPage());
 
   useEffect(() => {
     const onHashChange = () => {
-      setPageId(parseHashPage())
-    }
+      setPageId(parseHashPage());
+    };
 
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
-    const hash = `#${pageId}`
+    const hash = `#${pageId}`;
     if (window.location.hash !== hash) {
-      window.history.replaceState(null, '', hash)
+      window.history.replaceState(null, "", hash);
     }
-  }, [pageId])
+  }, [pageId]);
 
-  const page = useMemo(() => DEMO_PAGES[pageId] ?? DEMO_PAGES.basic, [pageId])
+  const page = useMemo(() => DEMO_PAGES[pageId] ?? DEMO_PAGES.basic, [pageId]);
 
   return (
     <main className="app-shell">
@@ -324,8 +361,8 @@ function App() {
         <p className="eyebrow">Component Library Sandbox</p>
         <h1>OverlappingCardsScroll</h1>
         <p>
-          Horizontal scroll drives a stacked card deck where each next card takes focus while previous cards keep a
-          visible leading edge.
+          Horizontal scroll drives a stacked card deck where each next card
+          takes focus while previous cards keep a visible leading edge.
         </p>
       </header>
 
@@ -334,7 +371,7 @@ function App() {
           <button
             key={id}
             type="button"
-            className={id === pageId ? 'is-active' : ''}
+            className={id === pageId ? "is-active" : ""}
             onClick={() => setPageId(id)}
           >
             {DEMO_PAGES[id].label}
@@ -379,7 +416,7 @@ function App() {
         </pre>
       </section>
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
