@@ -106,6 +106,9 @@ const TAB_POSITIONS = new Set(["above", "below"]);
 const normalizeTabsPosition = (value) =>
   TAB_POSITIONS.has(value) ? value : "above";
 
+// Persist across HMR so remount gets a valid fallback instead of 1
+let lastKnownViewportWidth = 1;
+
 function DefaultTabsContainerComponent({
   children,
   className,
@@ -331,7 +334,7 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   const shouldSnapOnMouseMoveRef = useRef(false);
   const focusTransitionTimeoutRef = useRef(null);
 
-  const [viewportWidth, setViewportWidth] = useState(1);
+  const [viewportWidth, setViewportWidth] = useState(lastKnownViewportWidth);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [focusTransition, setFocusTransition] = useState(null);
 
@@ -365,17 +368,24 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
       setScrollLeft(scrollElement.scrollLeft);
     };
 
+    const applyWidth = (width: number) => {
+      const w = Math.max(0, width);
+      if (w > 10) {
+        lastKnownViewportWidth = w;
+        setViewportWidth(w);
+      }
+      // Ignore bogus 0/small values during HMR; keep lastKnownViewportWidth
+    };
+
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
-      const width = entry?.contentRect?.width ?? 1;
-      setViewportWidth(Math.max(1, width));
+      const width = entry?.contentRect?.width ?? 0;
+      applyWidth(width);
       syncScroll();
     });
 
     resizeObserver.observe(containerElement);
-    setViewportWidth(
-      Math.max(1, containerElement.getBoundingClientRect().width || 1),
-    );
+    applyWidth(containerElement.getBoundingClientRect().width ?? 0);
     syncScroll();
 
     scrollElement.addEventListener("scroll", syncScroll, { passive: true });
