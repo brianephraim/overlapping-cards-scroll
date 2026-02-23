@@ -831,6 +831,7 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
                 return (
                   <Animated.View
                     key={card.key ?? `rn-ocs-card-${index}`}
+                    pointerEvents="box-none"
                     style={[
                       styles.card,
                       {
@@ -845,11 +846,13 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
                       cardContainerStyle,
                     ]}
                   >
-                    <OverlappingCardsScrollRNCardIndexContext.Provider
-                      value={index}
-                    >
-                      {card}
-                    </OverlappingCardsScrollRNCardIndexContext.Provider>
+                    <View pointerEvents="auto" style={styles.cardContent}>
+                      <OverlappingCardsScrollRNCardIndexContext.Provider
+                        value={index}
+                      >
+                        {card}
+                      </OverlappingCardsScrollRNCardIndexContext.Provider>
+                    </View>
                   </Animated.View>
                 );
               })}
@@ -886,6 +889,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     top: 0,
+  },
+  cardContent: {
+    flex: 1,
   },
   pageDotsRow: {
     width: "100%",
