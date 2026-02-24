@@ -147,6 +147,34 @@ export function RNWebDemo() {
           jsx: <RNCard {...card} />,
         }))}
       />
+
+      <View style={styles.divider} />
+
+      <Text style={styles.sectionTitle}>Wide Cards with Left Tabs</Text>
+      <Text style={styles.sectionDesc}>
+        cardWidthRatio=0.6, cardHeight=520, basePeek=72, minPeek=18,
+        tabsPosition="left-top"
+      </Text>
+      <OverlappingCardsScrollRN
+        cardHeight={520}
+        cardWidthRatio={0.6}
+        basePeek={72}
+        minPeek={18}
+        showPageDots
+        pageDotsPosition="below"
+        pageDotsOffset={10}
+        showTabs
+        tabsPosition="left-top"
+        tabsOffset={8}
+        tabsComponent={RNWebTab}
+        tabsContainerComponent={RNWebTabsContainer}
+        cardContainerStyle={styles.cardContainer}
+        items={RN_DEMO_CARDS.map((card) => ({
+          id: `wide-${card.id}`,
+          name: card.title,
+          jsx: <RNCard {...card} />,
+        }))}
+      />
     </View>
   );
 }
@@ -160,6 +188,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(31, 70, 102, 0.12)",
+    marginTop: 36,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    color: "#173047",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  sectionDesc: {
+    color: "#4a6b84",
+    fontSize: 14,
+    marginBottom: 12,
   },
   tabsContainer: {
     flexDirection: "row",

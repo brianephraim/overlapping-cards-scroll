@@ -361,6 +361,7 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   const cardCount = cards.length;
 
   const containerRef = useRef(null);
+  const stageRef = useRef(null);
   const scrollRef = useRef(null);
   const touchStateRef = useRef(null);
   const snapTimeoutRef = useRef(null);
@@ -391,9 +392,9 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
   }, [clearFocusTransitionTimeout]);
 
   useEffect(() => {
-    const containerElement = containerRef.current;
+    const stageElement = stageRef.current;
     const scrollElement = scrollRef.current;
-    if (!containerElement || !scrollElement) {
+    if (!stageElement || !scrollElement) {
       return undefined;
     }
 
@@ -417,8 +418,8 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
       syncScroll();
     });
 
-    resizeObserver.observe(containerElement);
-    applyWidth(containerElement.getBoundingClientRect().width ?? 0);
+    resizeObserver.observe(stageElement);
+    applyWidth(stageElement.getBoundingClientRect().width ?? 0);
     syncScroll();
 
     scrollElement.addEventListener("scroll", syncScroll, { passive: true });
@@ -802,8 +803,6 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     }
     touchStateRef.current = null;
   };
-
-  const stageRef = useRef(null);
 
   useEffect(() => {
     const stageElement = stageRef.current;

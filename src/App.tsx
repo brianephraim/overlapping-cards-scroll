@@ -31,6 +31,12 @@ const DEMO_PAGES = {
     description:
       "A larger deck to verify left-edge visibility and spacing when many cards share the same container.",
   },
+  wide: {
+    label: "Wide Cards",
+    title: "Wide Cards with Left Tabs",
+    description:
+      "Tall, wide cards (60% ratio) with left-aligned tabs and generous peek spacing.",
+  },
   tabs: {
     label: "Tabs Matrix",
     title: "Tabs Position + Align Matrix",
@@ -352,6 +358,31 @@ function TabsPermutationStage() {
 function DemoStage({ pageId }) {
   if (pageId === "rnweb") {
     return <RNWebDemo />;
+  }
+
+  if (pageId === "wide") {
+    return (
+      <OverlappingCardsScroll
+        cardHeight={520}
+        cardWidthRatio={0.6}
+        basePeek={72}
+        minPeek={18}
+        showPageDots
+        pageDotsPosition="below"
+        pageDotsOffset={10}
+        showTabs
+        tabsPosition="left-top"
+        tabsOffset={8}
+        tabsComponent={DemoTab}
+        tabsContainerComponent={DemoTabsContainer}
+        cardContainerStyle={{ borderRadius: 18, overflow: "hidden" }}
+        items={BASIC_CARD_DATA.map((card) => ({
+          name: card.title,
+          id: card.id,
+          jsx: <BasicCard {...card} />,
+        }))}
+      />
+    );
   }
 
   if (pageId === "tabs") {
