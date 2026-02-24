@@ -319,7 +319,7 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     focusTransitionDuration = 420,
     ariaLabel = "Overlapping cards scroll",
     showTabs = false,
-    tabsPosition = "top-center",
+    tabsPosition = "above",
     tabsOffset = 10,
     tabsBehavior = "smooth",
     tabsClassName = "",
@@ -918,6 +918,190 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
     );
   };
 
+  const tabsBeforeStage =
+    parsedTabsPosition.side === "top" || parsedTabsPosition.side === "left";
+
+  const stageAndDots = (
+    <>
+      {showNavigationDots && resolvedPageDotsPosition === "above" ? (
+        <nav
+          className={
+            pageDotsClassName
+              ? `ocs-page-dots ocs-page-dots--above ${pageDotsClassName}`
+              : "ocs-page-dots ocs-page-dots--above"
+          }
+          style={{ marginBottom: toCssDimension(pageDotsOffset) }}
+          aria-label="Card pages"
+        >
+          {cards.map((_, index) => {
+            const influence = clamp(1 - Math.abs(progress - index), 0, 1);
+            const opacity = 0.25 + influence * 0.75;
+            const scale = 0.9 + influence * 0.22;
+
+            return (
+              <button
+                key={`ocs-page-dot-above-${index}`}
+                type="button"
+                className="ocs-page-dot"
+                aria-label={`Go to card ${index + 1}`}
+                aria-current={influence > 0.98 ? "page" : undefined}
+                onClick={() =>
+                  focusCard(index, {
+                    behavior: pageDotsBehavior,
+                    transitionMode: "swoop",
+                  })
+                }
+                style={{ opacity, transform: `scale(${scale})` }}
+              />
+            );
+          })}
+        </nav>
+      ) : null}
+      <div className="ocs-stage-frame">
+        <div
+          className="ocs-stage"
+          ref={stageRef}
+          style={{
+            minHeight: toCssDimension(cardHeight),
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+        >
+          <div className="ocs-track">
+            {cards.map((card, index) => {
+              const cardX = resolveCardX(
+                index,
+                activeIndex,
+                transitionProgress,
+                layout,
+              );
+
+              return (
+                <div
+                  key={card.key ?? `ocs-card-${index}`}
+                  className={
+                    cardContainerClassName
+                      ? `${focusTransition ? "ocs-card ocs-card--focus-transition" : "ocs-card"} ${cardContainerClassName}`
+                      : focusTransition
+                        ? "ocs-card ocs-card--focus-transition"
+                        : "ocs-card"
+                  }
+                  style={{
+                    width: `${layout.cardWidth}px`,
+                    transform: `translate3d(${cardX}px, 0, 0)`,
+                    transitionDuration: focusTransition
+                      ? `${focusTransition.duration}ms`
+                      : undefined,
+                    ...cardContainerStyle,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      pointerEvents: "auto",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <OverlappingCardsScrollCardIndexContext.Provider
+                      value={index}
+                    >
+                      {card}
+                    </OverlappingCardsScrollCardIndexContext.Provider>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="ocs-scroll-region" ref={scrollRef}>
+            <div
+              className="ocs-scroll-spacer"
+              style={{
+                width: `${layout.trackWidth}px`,
+              }}
+            />
+          </div>
+        </div>
+        {showNavigationDots && resolvedPageDotsPosition === "overlay" ? (
+          <nav
+            className={
+              pageDotsClassName
+                ? `ocs-page-dots ocs-page-dots--overlay ${pageDotsClassName}`
+                : "ocs-page-dots ocs-page-dots--overlay"
+            }
+            style={{ bottom: toCssDimension(pageDotsOffset) }}
+            aria-label="Card pages"
+          >
+            {cards.map((_, index) => {
+              const influence = clamp(1 - Math.abs(progress - index), 0, 1);
+              const opacity = 0.25 + influence * 0.75;
+              const scale = 0.9 + influence * 0.22;
+
+              return (
+                <button
+                  key={`ocs-page-dot-overlay-${index}`}
+                  type="button"
+                  className="ocs-page-dot"
+                  aria-label={`Go to card ${index + 1}`}
+                  aria-current={influence > 0.98 ? "page" : undefined}
+                  onClick={() =>
+                    focusCard(index, {
+                      behavior: pageDotsBehavior,
+                      transitionMode: "swoop",
+                    })
+                  }
+                  style={{ opacity, transform: `scale(${scale})` }}
+                />
+              );
+            })}
+          </nav>
+        ) : null}
+      </div>
+      {showNavigationDots && resolvedPageDotsPosition === "below" ? (
+        <nav
+          className={
+            pageDotsClassName
+              ? `ocs-page-dots ocs-page-dots--below ${pageDotsClassName}`
+              : "ocs-page-dots ocs-page-dots--below"
+          }
+          style={{ marginTop: toCssDimension(pageDotsOffset) }}
+          aria-label="Card pages"
+        >
+          {cards.map((_, index) => {
+            const influence = clamp(1 - Math.abs(progress - index), 0, 1);
+            const opacity = 0.25 + influence * 0.75;
+            const scale = 0.9 + influence * 0.22;
+
+            return (
+              <button
+                key={`ocs-page-dot-below-${index}`}
+                type="button"
+                className="ocs-page-dot"
+                aria-label={`Go to card ${index + 1}`}
+                aria-current={influence > 0.98 ? "page" : undefined}
+                onClick={() =>
+                  focusCard(index, {
+                    behavior: pageDotsBehavior,
+                    transitionMode: "swoop",
+                  })
+                }
+                style={{ opacity, transform: `scale(${scale})` }}
+              />
+            );
+          })}
+        </nav>
+      ) : null}
+    </>
+  );
+
+  const stageContent = isVerticalTabs ? (
+    <div className="ocs-main-column">{stageAndDots}</div>
+  ) : (
+    stageAndDots
+  );
+
   return (
     <OverlappingCardsScrollControllerContext.Provider
       value={controllerContextValue}
@@ -927,357 +1111,9 @@ export function OverlappingCardsScroll(props: OverlappingCardsScrollProps) {
         aria-label={ariaLabel}
         ref={containerRef}
       >
-        {parsedTabsPosition.side === "top" ? renderTabs() : null}
-        {parsedTabsPosition.side === "left" ? renderTabs() : null}
-        {isVerticalTabs ? (
-          <div className="ocs-main-column">
-            {showNavigationDots && resolvedPageDotsPosition === "above" ? (
-              <nav
-                className={
-                  pageDotsClassName
-                    ? `ocs-page-dots ocs-page-dots--above ${pageDotsClassName}`
-                    : "ocs-page-dots ocs-page-dots--above"
-                }
-                style={{ marginBottom: toCssDimension(pageDotsOffset) }}
-                aria-label="Card pages"
-              >
-                {cards.map((_, index) => {
-                  const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                  const opacity = 0.25 + influence * 0.75;
-                  const scale = 0.9 + influence * 0.22;
-
-                  return (
-                    <button
-                      key={`ocs-page-dot-above-${index}`}
-                      type="button"
-                      className="ocs-page-dot"
-                      aria-label={`Go to card ${index + 1}`}
-                      aria-current={influence > 0.98 ? "page" : undefined}
-                      onClick={() =>
-                        focusCard(index, {
-                          behavior: pageDotsBehavior,
-                          transitionMode: "swoop",
-                        })
-                      }
-                      style={{ opacity, transform: `scale(${scale})` }}
-                    />
-                  );
-                })}
-              </nav>
-            ) : null}
-            <div className="ocs-stage-frame">
-              <div
-                className="ocs-stage"
-                ref={stageRef}
-                style={{
-                  minHeight: toCssDimension(cardHeight),
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchEnd}
-              >
-                <div className="ocs-track">
-                  {cards.map((card, index) => {
-                    const cardX = resolveCardX(
-                      index,
-                      activeIndex,
-                      transitionProgress,
-                      layout,
-                    );
-
-                    return (
-                      <div
-                        key={card.key ?? `ocs-card-${index}`}
-                        className={
-                          cardContainerClassName
-                            ? `${focusTransition ? "ocs-card ocs-card--focus-transition" : "ocs-card"} ${cardContainerClassName}`
-                            : focusTransition
-                              ? "ocs-card ocs-card--focus-transition"
-                              : "ocs-card"
-                        }
-                        style={{
-                          width: `${layout.cardWidth}px`,
-                          transform: `translate3d(${cardX}px, 0, 0)`,
-                          transitionDuration: focusTransition
-                            ? `${focusTransition.duration}ms`
-                            : undefined,
-                          ...cardContainerStyle,
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <div
-                          style={{
-                            pointerEvents: "auto",
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <OverlappingCardsScrollCardIndexContext.Provider
-                            value={index}
-                          >
-                            {card}
-                          </OverlappingCardsScrollCardIndexContext.Provider>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="ocs-scroll-region" ref={scrollRef}>
-                  <div
-                    className="ocs-scroll-spacer"
-                    style={{
-                      width: `${layout.trackWidth}px`,
-                    }}
-                  />
-                </div>
-              </div>
-              {showNavigationDots && resolvedPageDotsPosition === "overlay" ? (
-                <nav
-                  className={
-                    pageDotsClassName
-                      ? `ocs-page-dots ocs-page-dots--overlay ${pageDotsClassName}`
-                      : "ocs-page-dots ocs-page-dots--overlay"
-                  }
-                  style={{ bottom: toCssDimension(pageDotsOffset) }}
-                  aria-label="Card pages"
-                >
-                  {cards.map((_, index) => {
-                    const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                    const opacity = 0.25 + influence * 0.75;
-                    const scale = 0.9 + influence * 0.22;
-
-                    return (
-                      <button
-                        key={`ocs-page-dot-overlay-${index}`}
-                        type="button"
-                        className="ocs-page-dot"
-                        aria-label={`Go to card ${index + 1}`}
-                        aria-current={influence > 0.98 ? "page" : undefined}
-                        onClick={() =>
-                          focusCard(index, {
-                            behavior: pageDotsBehavior,
-                            transitionMode: "swoop",
-                          })
-                        }
-                        style={{ opacity, transform: `scale(${scale})` }}
-                      />
-                    );
-                  })}
-                </nav>
-              ) : null}
-            </div>
-            {showNavigationDots && resolvedPageDotsPosition === "below" ? (
-              <nav
-                className={
-                  pageDotsClassName
-                    ? `ocs-page-dots ocs-page-dots--below ${pageDotsClassName}`
-                    : "ocs-page-dots ocs-page-dots--below"
-                }
-                style={{ marginTop: toCssDimension(pageDotsOffset) }}
-                aria-label="Card pages"
-              >
-                {cards.map((_, index) => {
-                  const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                  const opacity = 0.25 + influence * 0.75;
-                  const scale = 0.9 + influence * 0.22;
-
-                  return (
-                    <button
-                      key={`ocs-page-dot-below-${index}`}
-                      type="button"
-                      className="ocs-page-dot"
-                      aria-label={`Go to card ${index + 1}`}
-                      aria-current={influence > 0.98 ? "page" : undefined}
-                      onClick={() =>
-                        focusCard(index, {
-                          behavior: pageDotsBehavior,
-                          transitionMode: "swoop",
-                        })
-                      }
-                      style={{ opacity, transform: `scale(${scale})` }}
-                    />
-                  );
-                })}
-              </nav>
-            ) : null}
-          </div>
-        ) : (
-          <>
-            {showNavigationDots && resolvedPageDotsPosition === "above" ? (
-              <nav
-                className={
-                  pageDotsClassName
-                    ? `ocs-page-dots ocs-page-dots--above ${pageDotsClassName}`
-                    : "ocs-page-dots ocs-page-dots--above"
-                }
-                style={{ marginBottom: toCssDimension(pageDotsOffset) }}
-                aria-label="Card pages"
-              >
-                {cards.map((_, index) => {
-                  const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                  const opacity = 0.25 + influence * 0.75;
-                  const scale = 0.9 + influence * 0.22;
-
-                  return (
-                    <button
-                      key={`ocs-page-dot-above-${index}`}
-                      type="button"
-                      className="ocs-page-dot"
-                      aria-label={`Go to card ${index + 1}`}
-                      aria-current={influence > 0.98 ? "page" : undefined}
-                      onClick={() =>
-                        focusCard(index, {
-                          behavior: pageDotsBehavior,
-                          transitionMode: "swoop",
-                        })
-                      }
-                      style={{ opacity, transform: `scale(${scale})` }}
-                    />
-                  );
-                })}
-              </nav>
-            ) : null}
-            <div className="ocs-stage-frame">
-              <div
-                className="ocs-stage"
-                ref={stageRef}
-                style={{
-                  minHeight: toCssDimension(cardHeight),
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchEnd}
-              >
-                <div className="ocs-track">
-                  {cards.map((card, index) => {
-                    const cardX = resolveCardX(
-                      index,
-                      activeIndex,
-                      transitionProgress,
-                      layout,
-                    );
-
-                    return (
-                      <div
-                        key={card.key ?? `ocs-card-${index}`}
-                        className={
-                          cardContainerClassName
-                            ? `${focusTransition ? "ocs-card ocs-card--focus-transition" : "ocs-card"} ${cardContainerClassName}`
-                            : focusTransition
-                              ? "ocs-card ocs-card--focus-transition"
-                              : "ocs-card"
-                        }
-                        style={{
-                          width: `${layout.cardWidth}px`,
-                          transform: `translate3d(${cardX}px, 0, 0)`,
-                          transitionDuration: focusTransition
-                            ? `${focusTransition.duration}ms`
-                            : undefined,
-                          ...cardContainerStyle,
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <div
-                          style={{
-                            pointerEvents: "auto",
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <OverlappingCardsScrollCardIndexContext.Provider
-                            value={index}
-                          >
-                            {card}
-                          </OverlappingCardsScrollCardIndexContext.Provider>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="ocs-scroll-region" ref={scrollRef}>
-                  <div
-                    className="ocs-scroll-spacer"
-                    style={{
-                      width: `${layout.trackWidth}px`,
-                    }}
-                  />
-                </div>
-              </div>
-              {showNavigationDots && resolvedPageDotsPosition === "overlay" ? (
-                <nav
-                  className={
-                    pageDotsClassName
-                      ? `ocs-page-dots ocs-page-dots--overlay ${pageDotsClassName}`
-                      : "ocs-page-dots ocs-page-dots--overlay"
-                  }
-                  style={{ bottom: toCssDimension(pageDotsOffset) }}
-                  aria-label="Card pages"
-                >
-                  {cards.map((_, index) => {
-                    const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                    const opacity = 0.25 + influence * 0.75;
-                    const scale = 0.9 + influence * 0.22;
-
-                    return (
-                      <button
-                        key={`ocs-page-dot-overlay-${index}`}
-                        type="button"
-                        className="ocs-page-dot"
-                        aria-label={`Go to card ${index + 1}`}
-                        aria-current={influence > 0.98 ? "page" : undefined}
-                        onClick={() =>
-                          focusCard(index, {
-                            behavior: pageDotsBehavior,
-                            transitionMode: "swoop",
-                          })
-                        }
-                        style={{ opacity, transform: `scale(${scale})` }}
-                      />
-                    );
-                  })}
-                </nav>
-              ) : null}
-            </div>
-            {showNavigationDots && resolvedPageDotsPosition === "below" ? (
-              <nav
-                className={
-                  pageDotsClassName
-                    ? `ocs-page-dots ocs-page-dots--below ${pageDotsClassName}`
-                    : "ocs-page-dots ocs-page-dots--below"
-                }
-                style={{ marginTop: toCssDimension(pageDotsOffset) }}
-                aria-label="Card pages"
-              >
-                {cards.map((_, index) => {
-                  const influence = clamp(1 - Math.abs(progress - index), 0, 1);
-                  const opacity = 0.25 + influence * 0.75;
-                  const scale = 0.9 + influence * 0.22;
-
-                  return (
-                    <button
-                      key={`ocs-page-dot-below-${index}`}
-                      type="button"
-                      className="ocs-page-dot"
-                      aria-label={`Go to card ${index + 1}`}
-                      aria-current={influence > 0.98 ? "page" : undefined}
-                      onClick={() =>
-                        focusCard(index, {
-                          behavior: pageDotsBehavior,
-                          transitionMode: "swoop",
-                        })
-                      }
-                      style={{ opacity, transform: `scale(${scale})` }}
-                    />
-                  );
-                })}
-              </nav>
-            ) : null}
-          </>
-        )}
-        {parsedTabsPosition.side === "right" ? renderTabs() : null}
-        {parsedTabsPosition.side === "bottom" ? renderTabs() : null}
+        {tabsBeforeStage ? renderTabs() : null}
+        {stageContent}
+        {!tabsBeforeStage ? renderTabs() : null}
       </section>
     </OverlappingCardsScrollControllerContext.Provider>
   );
