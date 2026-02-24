@@ -5,6 +5,9 @@ export {
 
 export type {
   CardItem,
+  TabsPosition,
+  TabsPositionSide,
+  TabsPositionAlign,
   OverlappingCardsScrollTabProps,
   OverlappingCardsScrollTabsContainerProps,
 } from "./OverlappingCardsScroll";
