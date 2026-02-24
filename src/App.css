@@ -220,6 +220,44 @@
   background: linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
 }
 
+.tabs-permutation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 0.9rem;
+}
+
+.tabs-permutation-item {
+  border: 1px solid rgba(23, 48, 71, 0.14);
+  border-radius: 16px;
+  background: rgba(248, 252, 255, 0.85);
+  padding: 0.7rem;
+}
+
+.tabs-permutation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+}
+
+.tabs-permutation-header h3 {
+  margin: 0;
+  color: var(--ink-900);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.tabs-permutation-header code {
+  border-radius: 999px;
+  border: 1px solid rgba(20, 72, 118, 0.22);
+  background: rgba(241, 248, 255, 0.95);
+  color: var(--ink-700);
+  font-size: 0.72rem;
+  padding: 0.22rem 0.52rem;
+}
+
 .api-notes pre {
   margin: 0.8rem 0 0;
   padding: 0.95rem;
@@ -260,6 +298,10 @@
     width: min(1120px, 100% - 1.2rem);
     margin-top: 1rem;
     margin-bottom: 1.3rem;
+  }
+
+  .tabs-permutation-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .demo-card {

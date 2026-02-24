@@ -5,6 +5,7 @@ import {
   OverlappingCardsScrollFocusTrigger,
 } from "./lib";
 import type {
+  TabsPosition,
   OverlappingCardsScrollTabProps,
   OverlappingCardsScrollTabsContainerProps,
 } from "./lib";
@@ -29,6 +30,12 @@ const DEMO_PAGES = {
     title: "Many-Card Stack",
     description:
       "A larger deck to verify left-edge visibility and spacing when many cards share the same container.",
+  },
+  tabs: {
+    label: "Tabs Matrix",
+    title: "Tabs Position + Align Matrix",
+    description:
+      "Permutation gallery for `tabsPosition` values across top, bottom, left, and right anchors.",
   },
   rnweb: {
     label: "RN Web",
@@ -128,6 +135,45 @@ const CONTENT_CARD_DATA = [
 ];
 
 const STRESS_CARD_COUNT = 14;
+
+const TAB_POSITION_VALUES: TabsPosition[] = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+  "left-top",
+  "left-center",
+  "left-bottom",
+  "right-top",
+  "right-center",
+  "right-bottom",
+];
+
+const TAB_POSITION_CARD_DATA = [
+  {
+    id: "tabs-01",
+    tag: "Card 01",
+    title: "Anchor Controls",
+    body: "Tab rail position and alignment are controlled by one prop value.",
+    accent: "#0f8b8d",
+  },
+  {
+    id: "tabs-02",
+    tag: "Card 02",
+    title: "Layout Pairing",
+    body: "Vertical tab rails use left/right sides with top/center/bottom alignment.",
+    accent: "#f4a261",
+  },
+  {
+    id: "tabs-03",
+    tag: "Card 03",
+    title: "Quick Validation",
+    body: "Use this gallery to verify visual placement and interaction behavior.",
+    accent: "#3a86ff",
+  },
+];
 
 const pageOrder = Object.keys(DEMO_PAGES);
 
@@ -269,9 +315,47 @@ function DemoTab({
   );
 }
 
+function TabsPermutationStage() {
+  return (
+    <div className="tabs-permutation-grid">
+      {TAB_POSITION_VALUES.map((tabsPosition) => (
+        <article
+          key={`tabs-permutation-${tabsPosition}`}
+          className="tabs-permutation-item"
+        >
+          <header className="tabs-permutation-header">
+            <h3>{tabsPosition}</h3>
+            <code>{`tabsPosition="${tabsPosition}"`}</code>
+          </header>
+          <OverlappingCardsScroll
+            cardHeight={250}
+            basePeek={58}
+            minPeek={8}
+            showTabs
+            tabsPosition={tabsPosition}
+            tabsOffset={8}
+            tabsComponent={DemoTab}
+            tabsContainerComponent={DemoTabsContainer}
+            cardContainerStyle={{ borderRadius: 16, overflow: "hidden" }}
+            items={TAB_POSITION_CARD_DATA.map((card) => ({
+              name: card.title,
+              id: card.id,
+              jsx: <BasicCard {...card} />,
+            }))}
+          />
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function DemoStage({ pageId }) {
   if (pageId === "rnweb") {
     return <RNWebDemo />;
+  }
+
+  if (pageId === "tabs") {
+    return <TabsPermutationStage />;
   }
 
   if (pageId === "content") {

@@ -123,6 +123,45 @@ const IOS_WIDTH_EXAMPLES = [
   { label: "250", value: 250 },
 ];
 
+const TAB_POSITION_EXAMPLES = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+  "left-top",
+  "left-center",
+  "left-bottom",
+  "right-top",
+  "right-center",
+  "right-bottom",
+] as const;
+
+const TAB_POSITION_CARDS = [
+  {
+    id: "tabs-1",
+    tag: "Card 01",
+    title: "Anchor Controls",
+    body: "Use tabsPosition to move the tab rail around the component shell.",
+    color: "#0f8b8d",
+  },
+  {
+    id: "tabs-2",
+    tag: "Card 02",
+    title: "Align Variants",
+    body: "Each side supports start/center/end alignment combinations.",
+    color: "#f4a261",
+  },
+  {
+    id: "tabs-3",
+    tag: "Card 03",
+    title: "Native Behavior",
+    body: "Verify spacing, clipping, and interaction for each permutation.",
+    color: "#3a86ff",
+  },
+];
+
 function ExpoCard({ tag, title, body, color, scrollLines = undefined }) {
   const [clickCount, setClickCount] = useState(0);
 
@@ -220,6 +259,7 @@ function ExpoTab({
 export default function App() {
   const normalCardHeight = Platform.OS === "ios" ? 500 : 280;
   const stressCardHeight = Platform.OS === "ios" ? 500 : 280;
+  const tabsPermutationCardHeight = Platform.OS === "ios" ? 360 : 240;
 
   return (
     <ScrollView style={styles.page} contentContainerStyle={styles.pageContent}>
@@ -269,6 +309,43 @@ export default function App() {
             <ExpoCard key={card.id} {...card} />
           ))}
         </OverlappingCardsScrollRN>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Tabs Position + Align Matrix</Text>
+        <Text style={styles.sectionDescription}>
+          Permutations of the new `tabsPosition` values across all supported
+          anchors.
+        </Text>
+        {TAB_POSITION_EXAMPLES.map((tabsPosition) => (
+          <View
+            key={`tabs-position-example-${tabsPosition}`}
+            style={styles.tabsPermutationExample}
+          >
+            <Text style={styles.tabsPermutationLabel}>
+              tabsPosition="{tabsPosition}"
+            </Text>
+            <OverlappingCardsScrollRN
+              cardHeight={tabsPermutationCardHeight}
+              basePeek={46}
+              minPeek={6}
+              showPageDots
+              pageDotsPosition="below"
+              pageDotsOffset={8}
+              showTabs
+              tabsPosition={tabsPosition}
+              tabsOffset={8}
+              tabsComponent={ExpoTab}
+              tabsContainerComponent={ExpoTabsContainer}
+              cardContainerStyle={styles.normalCardContainer}
+              items={TAB_POSITION_CARDS.map((card) => ({
+                id: `${tabsPosition}-${card.id}`,
+                name: card.title,
+                jsx: <ExpoCard {...card} />,
+              }))}
+            />
+          </View>
+        ))}
       </View>
 
       {Platform.OS === "ios" && (
@@ -338,6 +415,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   widthExampleLabel: {
+    color: "#284a62",
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  tabsPermutationExample: {
+    marginBottom: 14,
+  },
+  tabsPermutationLabel: {
     color: "#284a62",
     fontSize: 13,
     lineHeight: 18,
