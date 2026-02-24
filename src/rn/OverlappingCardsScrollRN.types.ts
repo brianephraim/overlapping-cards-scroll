@@ -37,12 +37,15 @@ export type OverlappingCardsScrollRNSnapDecelerationRate =
 
 export type OverlappingCardsScrollRNItem = OverlappingCardsScrollWebCardItem;
 
-export type OverlappingCardsScrollRNTabsPosition = "above" | "below";
+export type OverlappingCardsScrollRNTabsPosition = "top" | "bottom" | "left" | "right";
+
+export type OverlappingCardsScrollRNTabsAlign = "start" | "center" | "end";
 
 export interface OverlappingCardsScrollRNTabProps {
   name: string;
   index: number;
   position: OverlappingCardsScrollRNTabsPosition;
+  align: OverlappingCardsScrollRNTabsAlign;
   isPrincipal: boolean;
   influence: number;
   animate: {
@@ -64,6 +67,7 @@ export interface OverlappingCardsScrollRNTabProps {
 export interface OverlappingCardsScrollRNTabsContainerProps {
   children: ReactNode;
   position: OverlappingCardsScrollRNTabsPosition;
+  align: OverlappingCardsScrollRNTabsAlign;
   className: string;
   style: StyleProp<ViewStyle>;
   ariaLabel: string;

@@ -27,6 +27,7 @@ import type {
   OverlappingCardsScrollRNTabsContainerProps,
   OverlappingCardsScrollRNTabProps,
   OverlappingCardsScrollRNTabsPosition,
+  OverlappingCardsScrollRNTabsAlign,
 } from "./OverlappingCardsScrollRN.types";
 
 export type {
@@ -37,6 +38,7 @@ export type {
   OverlappingCardsScrollRNPageDotsPosition,
   OverlappingCardsScrollRNProps,
   OverlappingCardsScrollRNSnapDecelerationRate,
+  OverlappingCardsScrollRNTabsAlign,
   OverlappingCardsScrollRNTabsContainerProps,
   OverlappingCardsScrollRNTabProps,
   OverlappingCardsScrollRNTabsPosition,
@@ -44,13 +46,36 @@ export type {
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const PAGE_DOT_POSITIONS = new Set(["above", "below", "overlay"]);
-const TAB_POSITIONS = new Set(["above", "below"]);
+interface ParsedTabsPosition {
+  side: "top" | "bottom" | "left" | "right";
+  align: "start" | "center" | "end";
+  orientation: "horizontal" | "vertical";
+}
+
+const TABS_POSITION_MAP: Record<string, ParsedTabsPosition> = {
+  "top-left":      { side: "top",    align: "start",  orientation: "horizontal" },
+  "top-center":    { side: "top",    align: "center", orientation: "horizontal" },
+  "top-right":     { side: "top",    align: "end",    orientation: "horizontal" },
+  "bottom-left":   { side: "bottom", align: "start",  orientation: "horizontal" },
+  "bottom-center": { side: "bottom", align: "center", orientation: "horizontal" },
+  "bottom-right":  { side: "bottom", align: "end",    orientation: "horizontal" },
+  "left-top":      { side: "left",   align: "start",  orientation: "vertical" },
+  "left-center":   { side: "left",   align: "center", orientation: "vertical" },
+  "left-bottom":   { side: "left",   align: "end",    orientation: "vertical" },
+  "right-top":     { side: "right",  align: "start",  orientation: "vertical" },
+  "right-center":  { side: "right",  align: "center", orientation: "vertical" },
+  "right-bottom":  { side: "right",  align: "end",    orientation: "vertical" },
+  "above":         { side: "top",    align: "center", orientation: "horizontal" },
+  "below":         { side: "bottom", align: "center", orientation: "horizontal" },
+};
+
+const DEFAULT_TABS_POSITION: ParsedTabsPosition = { side: "top", align: "center", orientation: "horizontal" };
+
+const parseTabsPosition = (value: string | undefined): ParsedTabsPosition =>
+  (value && TABS_POSITION_MAP[value]) || DEFAULT_TABS_POSITION;
 
 const normalizePageDotsPosition = (value) =>
   PAGE_DOT_POSITIONS.has(value) ? value : "below";
-
-const normalizeTabsPosition = (value) =>
-  TAB_POSITIONS.has(value) ? value : "above";
 
 const toNumericOffset = (value, fallback = 0) => {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -319,7 +344,8 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
   }, [itemsProp]);
 
   const cardCount = cards.length;
-  const resolvedTabsPosition = normalizeTabsPosition(tabsPosition);
+  const parsedTabsPosition = parseTabsPosition(tabsPosition);
+  const isVerticalTabs = parsedTabsPosition.orientation === "vertical";
   const showNavigationTabs = showTabs && cardCount > 1 && cardNames !== null;
   const resolvedPageDotsOffset = toNumericOffset(pageDotsOffset, 10);
   const resolvedTabsOffset = toNumericOffset(tabsOffset, 10);
@@ -677,24 +703,33 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
     );
   };
 
-  const renderTabs = (position: OverlappingCardsScrollRNTabsPosition) => {
-    if (
-      !showNavigationTabs ||
-      resolvedTabsPosition !== position ||
-      cardNames === null
-    ) {
+  const renderTabs = () => {
+    if (!showNavigationTabs || cardNames === null) {
       return null;
     }
 
+    const { side, align, orientation } = parsedTabsPosition;
+    const isVertical = orientation === "vertical";
+
+    const justifyContent: "flex-start" | "flex-end" | "center" =
+      align === "start" ? "flex-start" : align === "end" ? "flex-end" : "center";
+
+    const baseStyle = isVertical ? styles.tabsColumn : styles.tabsRow;
+
     const containerStyle =
-      position === "above"
-        ? [styles.tabsRow, { marginBottom: resolvedTabsOffset }]
-        : [styles.tabsRow, { marginTop: resolvedTabsOffset }];
+      side === "top"
+        ? [baseStyle, { justifyContent, marginBottom: resolvedTabsOffset }]
+        : side === "bottom"
+          ? [baseStyle, { justifyContent, marginTop: resolvedTabsOffset }]
+          : side === "left"
+            ? [baseStyle, { justifyContent, marginRight: resolvedTabsOffset }]
+            : [baseStyle, { justifyContent, marginLeft: resolvedTabsOffset }];
 
     return (
       <TabsContainerComponent
-        position={position}
-        className={`rn-ocs-tabs rn-ocs-tabs--${position}`}
+        position={side}
+        align={align}
+        className={`rn-ocs-tabs rn-ocs-tabs--${side}`}
         style={containerStyle}
         ariaLabel="Card tabs"
         cardNames={cardNames}
@@ -715,10 +750,11 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
 
           return (
             <TabsComponent
-              key={`rn-ocs-tab-${position}-${index}`}
+              key={`rn-ocs-tab-${side}-${index}`}
               name={name}
               index={index}
-              position={position}
+              position={side}
+              align={align}
               isPrincipal={isPrincipal}
               influence={influence}
               animate={animate}
@@ -740,128 +776,144 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
     );
   };
 
+  const tabsBeforeStage =
+    parsedTabsPosition.side === "top" || parsedTabsPosition.side === "left";
+
+  // The page dots + card area content (reused for both layouts)
+  const stageAndDots = (
+    <>
+      {renderPageDots("above")}
+      <View
+        style={[styles.root, { height: resolvedCardHeight }]}
+        onLayout={(event) => {
+          const width = event.nativeEvent.layout.width || 1;
+          setViewportWidth(Math.max(1, width));
+        }}
+      >
+        <Animated.ScrollView
+          ref={scrollRef}
+          horizontal
+          style={[styles.scrollRegion, { height: resolvedCardHeight }]}
+          contentContainerStyle={{
+            width: layout.trackWidth,
+            height: resolvedCardHeight,
+          }}
+          onScroll={onScroll}
+          onScrollBeginDrag={cancelFocusTransition}
+          onMomentumScrollBegin={cancelFocusTransition}
+          scrollEventThrottle={16}
+          showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
+          snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
+          snapToAlignment={shouldSnapToCard ? "start" : undefined}
+          decelerationRate={
+            shouldSnapToCard
+              ? (snapDecelerationRate as number | "normal" | "fast")
+              : "normal"
+          }
+          disableIntervalMomentum={
+            shouldSnapToCard ? snapDisableIntervalMomentum : false
+          }
+        >
+          <View
+            style={[
+              styles.track,
+              { width: layout.trackWidth, height: resolvedCardHeight },
+            ]}
+          >
+            {cards.map((card, index) => {
+              const restingRightX =
+                index === 0
+                  ? 0
+                  : (index - 1) * layout.peek + layout.cardWidth;
+              const restingLeftX = index * layout.peek;
+
+              const cardXDuringNormalScroll =
+                index === 0
+                  ? 0
+                  : scrollX.interpolate({
+                      inputRange:
+                        index === 1
+                          ? [0, layout.stepDistance]
+                          : [
+                              (index - 1) * layout.stepDistance,
+                              index * layout.stepDistance,
+                            ],
+                      outputRange: [restingRightX, restingLeftX],
+                      extrapolate: "clamp",
+                    });
+
+              const cardXDuringFocusTransition = focusTransition
+                ? focusTransitionProgress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [
+                      resolveCardXAtProgress(
+                        index,
+                        focusTransition.fromProgress,
+                        layout,
+                      ),
+                      resolveCardXAtProgress(
+                        index,
+                        focusTransition.toProgress,
+                        layout,
+                      ),
+                    ],
+                    extrapolate: "clamp",
+                  })
+                : null;
+
+              const animatedCardX =
+                cardXDuringFocusTransition ?? cardXDuringNormalScroll;
+
+              return (
+                <Animated.View
+                  key={card.key ?? `rn-ocs-card-${index}`}
+                  pointerEvents="box-none"
+                  style={[
+                    styles.card,
+                    {
+                      width: layout.cardWidth,
+                      height: resolvedCardHeight,
+                      transform: [
+                        {
+                          translateX: Animated.add(scrollX, animatedCardX),
+                        },
+                      ],
+                    },
+                    cardContainerStyle,
+                  ]}
+                >
+                  <View pointerEvents="auto" style={styles.cardContent}>
+                    <OverlappingCardsScrollRNCardIndexContext.Provider
+                      value={index}
+                    >
+                      {card}
+                    </OverlappingCardsScrollRNCardIndexContext.Provider>
+                  </View>
+                </Animated.View>
+              );
+            })}
+          </View>
+        </Animated.ScrollView>
+        {renderPageDots("overlay")}
+      </View>
+      {renderPageDots("below")}
+    </>
+  );
+
+  const stageContent = isVerticalTabs ? (
+    <View style={styles.mainColumn}>{stageAndDots}</View>
+  ) : (
+    stageAndDots
+  );
+
   return (
     <OverlappingCardsScrollRNControllerContext.Provider
       value={controllerContextValue}
     >
-      <View style={[styles.shell, style]}>
-        {renderTabs("above")}
-        {renderPageDots("above")}
-        <View
-          style={[styles.root, { height: resolvedCardHeight }]}
-          onLayout={(event) => {
-            const width = event.nativeEvent.layout.width || 1;
-            setViewportWidth(Math.max(1, width));
-          }}
-        >
-          <Animated.ScrollView
-            ref={scrollRef}
-            horizontal
-            style={[styles.scrollRegion, { height: resolvedCardHeight }]}
-            contentContainerStyle={{
-              width: layout.trackWidth,
-              height: resolvedCardHeight,
-            }}
-            onScroll={onScroll}
-            onScrollBeginDrag={cancelFocusTransition}
-            onMomentumScrollBegin={cancelFocusTransition}
-            scrollEventThrottle={16}
-            showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
-            snapToInterval={shouldSnapToCard ? layout.stepDistance : undefined}
-            snapToAlignment={shouldSnapToCard ? "start" : undefined}
-            decelerationRate={
-              shouldSnapToCard
-                ? (snapDecelerationRate as number | "normal" | "fast")
-                : "normal"
-            }
-            disableIntervalMomentum={
-              shouldSnapToCard ? snapDisableIntervalMomentum : false
-            }
-          >
-            <View
-              style={[
-                styles.track,
-                { width: layout.trackWidth, height: resolvedCardHeight },
-              ]}
-            >
-              {cards.map((card, index) => {
-                const restingRightX =
-                  index === 0
-                    ? 0
-                    : (index - 1) * layout.peek + layout.cardWidth;
-                const restingLeftX = index * layout.peek;
-
-                const cardXDuringNormalScroll =
-                  index === 0
-                    ? 0
-                    : scrollX.interpolate({
-                        inputRange:
-                          index === 1
-                            ? [0, layout.stepDistance]
-                            : [
-                                (index - 1) * layout.stepDistance,
-                                index * layout.stepDistance,
-                              ],
-                        outputRange: [restingRightX, restingLeftX],
-                        extrapolate: "clamp",
-                      });
-
-                const cardXDuringFocusTransition = focusTransition
-                  ? focusTransitionProgress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [
-                        resolveCardXAtProgress(
-                          index,
-                          focusTransition.fromProgress,
-                          layout,
-                        ),
-                        resolveCardXAtProgress(
-                          index,
-                          focusTransition.toProgress,
-                          layout,
-                        ),
-                      ],
-                      extrapolate: "clamp",
-                    })
-                  : null;
-
-                const animatedCardX =
-                  cardXDuringFocusTransition ?? cardXDuringNormalScroll;
-
-                return (
-                  <Animated.View
-                    key={card.key ?? `rn-ocs-card-${index}`}
-                    pointerEvents="box-none"
-                    style={[
-                      styles.card,
-                      {
-                        width: layout.cardWidth,
-                        height: resolvedCardHeight,
-                        transform: [
-                          {
-                            translateX: Animated.add(scrollX, animatedCardX),
-                          },
-                        ],
-                      },
-                      cardContainerStyle,
-                    ]}
-                  >
-                    <View pointerEvents="auto" style={styles.cardContent}>
-                      <OverlappingCardsScrollRNCardIndexContext.Provider
-                        value={index}
-                      >
-                        {card}
-                      </OverlappingCardsScrollRNCardIndexContext.Provider>
-                    </View>
-                  </Animated.View>
-                );
-              })}
-            </View>
-          </Animated.ScrollView>
-          {renderPageDots("overlay")}
-        </View>
-        {renderPageDots("below")}
-        {renderTabs("below")}
+      <View style={[isVerticalTabs ? styles.shellRow : styles.shell, style]}>
+        {tabsBeforeStage ? renderTabs() : null}
+        {stageContent}
+        {!tabsBeforeStage ? renderTabs() : null}
       </View>
     </OverlappingCardsScrollRNControllerContext.Provider>
   );
@@ -870,6 +922,15 @@ export function OverlappingCardsScrollRN(props: OverlappingCardsScrollRNProps) {
 const styles = StyleSheet.create({
   shell: {
     width: "100%",
+    minWidth: 0,
+  },
+  shellRow: {
+    width: "100%",
+    minWidth: 0,
+    flexDirection: "row",
+  },
+  mainColumn: {
+    flex: 1,
     minWidth: 0,
   },
   root: {
@@ -925,6 +986,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexWrap: "wrap",
+    zIndex: 6,
+  },
+  tabsColumn: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
     zIndex: 6,
   },
   tab: {
