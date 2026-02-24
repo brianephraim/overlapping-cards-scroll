@@ -213,3 +213,42 @@
   outline: 2px solid rgba(16, 57, 93, 0.52);
   outline-offset: 2px;
 }
+
+.overlapping-cards-scroll--vertical-tabs {
+  flex-direction: row;
+}
+
+.ocs-main-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ocs-tabs--vertical {
+  flex-direction: column;
+  width: auto;
+  overflow-x: visible;
+  overflow-y: auto;
+}
+
+.ocs-tabs--align-start {
+  justify-content: flex-start;
+}
+
+.ocs-tabs--align-center {
+  justify-content: center;
+}
+
+.ocs-tabs--align-end {
+  justify-content: flex-end;
+}
+
+.ocs-tabs--vertical .ocs-tab:hover {
+  transform: translateX(1px);
+}
+
+.ocs-tabs--left .ocs-tab:hover {
+  transform: translateX(-1px);
+}
